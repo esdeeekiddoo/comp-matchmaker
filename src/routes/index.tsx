@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   MessageCircle,
@@ -39,8 +40,33 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+function parseSession(): { user_id: string; username: string; avatar_url: string } | null {
+  const cookie = getCookie("capl_session");
+  if (!cookie) return null;
+  const parts = cookie.split(".");
+  if (parts.length < 2) return null;
+  try {
+    const base64 = parts[0].replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = atob(base64);
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+}
+
 function Home() {
   const { top, recent, total } = Route.useLoaderData();
+  const [session, setSession] = useState<ReturnType<typeof parseSession>>(null);
+
+  useEffect(() => {
+    setSession(parseSession());
+  }, []);
 
   return (
     <AppShell>
@@ -86,14 +112,25 @@ function Hero() {
           through Discord, track your stats, and climb the leaderboard.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button
-            asChild
-            className="gap-2 bg-[#5865F2] text-white hover:bg-[#4752c4]"
-          >
-            <a href="/api/auth/discord">
-              <MessageCircle className="h-4 w-4" /> Connect Discord
-            </a>
-          </Button>
+          {!session ? (
+            <Button
+              asChild
+              className="gap-2 bg-[#5865F2] text-white hover:bg-[#4752c4]"
+            >
+              <a href="/api/auth/discord">
+                <MessageCircle className="h-4 w-4" /> Connect Discord
+              </a>
+            </Button>
+          ) : (
+            <Button
+              asChild
+              className="gap-2"
+            >
+              <Link to="/queue">
+                <Swords className="h-4 w-4" /> Join Queue
+              </Link>
+            </Button>
+          )}
           <Button
             asChild
             variant="outline"
