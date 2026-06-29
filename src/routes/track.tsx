@@ -11,7 +11,7 @@ export const Route = createFileRoute("/track")({
   },
   head: () => ({
     meta: [
-      { title: "Track — Jail Bird Matchmaking" },
+      { title: "Track — CAPL | Counter-Blox APL" },
       { name: "description", content: "Track ELO progression and performance trends." },
     ],
   }),
@@ -42,8 +42,13 @@ function Track() {
               const winPct = total > 0 ? Math.round((p.wins / total) * 100) : 0;
               const name = p.username ?? p.discord_id;
               return (
-                <div key={p.discord_id} className="flex items-center gap-3 rounded-md bg-muted/30 px-4 py-2.5">
-                  <span className="w-6 text-center font-display text-sm font-bold text-muted-foreground">#{i + 1}</span>
+                <div
+                  key={p.discord_id}
+                  className="flex items-center gap-3 rounded-md bg-muted/30 px-4 py-2.5"
+                >
+                  <span className="w-6 text-center font-display text-sm font-bold text-muted-foreground">
+                    #{i + 1}
+                  </span>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium">{name}</div>
                   </div>
@@ -56,7 +61,9 @@ function Track() {
               );
             })}
             {top.length === 0 && (
-              <p className="py-6 text-center text-sm text-muted-foreground">No players tracked yet.</p>
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                No players tracked yet.
+              </p>
             )}
           </div>
         </Card>

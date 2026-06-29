@@ -30,9 +30,9 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Jail Bird Matchmaking — Competitive 5v5" },
+      { title: "CAPL | Counter-Blox APL" },
       { name: "description", content: "Track ranks, ELO, stats and match history." },
-      { property: "og:title", content: "Jail Bird Matchmaking — Competitive 5v5" },
+      { property: "og:title", content: "CAPL | Counter-Blox APL" },
       { property: "og:description", content: "Climb the ladder. Queue directly from Discord." },
     ],
   }),
@@ -70,7 +70,7 @@ function Hero() {
     >
       <img
         src={hero}
-        alt="Jail Bird Matchmaking"
+        alt="CAPL"
         className="absolute inset-0 h-full w-full object-cover opacity-70"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent" />
@@ -82,8 +82,8 @@ function Hero() {
           Queue Smarter. <span className="text-primary">Climb Harder.</span>
         </h1>
         <p className="max-w-lg text-sm text-muted-foreground sm:text-base">
-          Jail Bird Matchmaking — competitive 5v5 ranked matchmaking. Queue through Discord, track
-          your stats, and climb the leaderboard.
+          CAPL | Counter-Blox Asia Premier League — competitive 5v5 ranked matchmaking. Queue
+          through Discord, track your stats, and climb the leaderboard.
         </p>
         <div className="flex flex-wrap gap-3">
           <Button
@@ -190,29 +190,34 @@ function RecentMatches({ matches }: { matches: Awaited<ReturnType<typeof getRece
         {matches.map((m) => {
           const img = getMapImage(m.selected_map);
           return (
-          <Link
-            key={m.id}
-            to="/matches/$id"
-            params={{ id: m.id }}
-            className="flex items-center gap-3 rounded-md p-2 transition hover:bg-muted/50"
-          >
-            {img ? (
-              <div className="h-10 w-16 shrink-0 overflow-hidden rounded">
-                <img src={img} alt={m.selected_map ?? ""} className="h-full w-full object-cover" />
+            <Link
+              key={m.id}
+              to="/matches/$id"
+              params={{ id: m.id }}
+              className="flex items-center gap-3 rounded-md p-2 transition hover:bg-muted/50"
+            >
+              {img ? (
+                <div className="h-10 w-16 shrink-0 overflow-hidden rounded">
+                  <img
+                    src={img}
+                    alt={m.selected_map ?? ""}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <Map className="h-4 w-4 text-muted-foreground shrink-0" />
+              )}
+              <div className="min-w-0 flex-1 text-sm">
+                <span className="font-medium">{m.selected_map ?? "Unknown map"}</span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  · #{m.match_number} · {m.region}
+                </span>
               </div>
-            ) : (
-              <Map className="h-4 w-4 text-muted-foreground shrink-0" />
-            )}
-            <div className="min-w-0 flex-1 text-sm">
-              <span className="font-medium">{m.selected_map ?? "Unknown map"}</span>
-              <span className="text-muted-foreground">
-                {" "}· #{m.match_number} · {m.region}
-              </span>
-            </div>
-            <Badge variant="outline" className="text-[10px] capitalize">
-              {m.winner ?? "?"}
-            </Badge>
-          </Link>
+              <Badge variant="outline" className="text-[10px] capitalize">
+                {m.winner ?? "?"}
+              </Badge>
+            </Link>
           );
         })}
       </div>
@@ -239,7 +244,9 @@ function TopPlayersCard({ top }: { top: Awaited<ReturnType<typeof getPlayers>> }
               params={{ username: name }}
               className="flex items-center gap-3 rounded-md p-1.5 transition hover:bg-muted/50"
             >
-              <span className={`w-5 text-center font-display text-sm font-bold ${i < 3 ? "text-primary" : "text-muted-foreground"}`}>
+              <span
+                className={`w-5 text-center font-display text-sm font-bold ${i < 3 ? "text-primary" : "text-muted-foreground"}`}
+              >
                 {i + 1}
               </span>
               <Avatar className="h-8 w-8 border border-border">
@@ -272,10 +279,7 @@ function DiscordCard() {
         <p className="text-xs text-muted-foreground">
           Queue up, compete, and track your progress — all through Discord.
         </p>
-        <Button
-          asChild
-          className="w-full gap-2 bg-[#5865F2] text-white hover:bg-[#4752c4]"
-        >
+        <Button asChild className="w-full gap-2 bg-[#5865F2] text-white hover:bg-[#4752c4]">
           <a href="https://discord.gg/F6ZfYevYXd" target="_blank" rel="noopener noreferrer">
             <ExternalLink className="h-4 w-4" /> Join Discord
           </a>

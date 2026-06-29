@@ -16,9 +16,9 @@ export const Route = createFileRoute("/leaderboard")({
   },
   head: () => ({
     meta: [
-      { title: "Leaderboard — Jail Bird Matchmaking" },
+      { title: "Leaderboard — CAPL | Counter-Blox APL" },
       { name: "description", content: "Top ranked 5v5 players sorted by ELO." },
-      { property: "og:title", content: "Jail Bird Leaderboard" },
+      { property: "og:title", content: "CAPL | Counter-Blox APL — Leaderboard" },
       { property: "og:description", content: "Climb the ranked ladder." },
     ],
   }),
@@ -80,7 +80,9 @@ function Leaderboard() {
                   className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 px-4 py-3 transition last:border-b-0 hover:bg-muted/40"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span className={`font-display text-sm font-bold ${i < 3 ? "text-primary" : "text-muted-foreground"}`}>
+                    <span
+                      className={`font-display text-sm font-bold ${i < 3 ? "text-primary" : "text-muted-foreground"}`}
+                    >
                       #{i + 1}
                     </span>
                   </div>

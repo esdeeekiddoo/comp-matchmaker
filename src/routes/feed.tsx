@@ -11,8 +11,11 @@ export const Route = createFileRoute("/feed")({
   },
   head: () => ({
     meta: [
-      { title: "Feed — Jail Bird Matchmaking" },
-      { name: "description", content: "Live activity feed of matches, rank-ups and tournament news." },
+      { title: "Feed — CAPL | Counter-Blox APL" },
+      {
+        name: "description",
+        content: "Live activity feed of matches, rank-ups and tournament news.",
+      },
     ],
   }),
   component: Feed,
@@ -47,13 +50,17 @@ function Feed() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">{e.title}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{e.sub}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {e.sub}
+                  </div>
                 </div>
               </Card>
             </Link>
           ))}
           {events.length === 0 && (
-            <p className="py-10 text-center text-sm text-muted-foreground">No players tracked yet.</p>
+            <p className="py-10 text-center text-sm text-muted-foreground">
+              No players tracked yet.
+            </p>
           )}
         </div>
       </div>

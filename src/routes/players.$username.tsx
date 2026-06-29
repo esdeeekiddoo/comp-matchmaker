@@ -18,8 +18,17 @@ export const Route = createFileRoute("/players/$username")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: loaderData ? `${loaderData.player.username ?? loaderData.player.discord_id} — Jail Bird Matchmaking` : "Player — Jail Bird Matchmaking" },
-      { name: "description", content: loaderData ? `${loaderData.player.elo} ELO · ${loaderData.player.wins}W ${loaderData.player.losses}L` : "Player profile" },
+      {
+        title: loaderData
+          ? `${loaderData.player.username ?? loaderData.player.discord_id} — CAPL | Counter-Blox APL`
+          : "Player — CAPL | Counter-Blox APL",
+      },
+      {
+        name: "description",
+        content: loaderData
+          ? `${loaderData.player.elo} ELO · ${loaderData.player.wins}W ${loaderData.player.losses}L`
+          : "Player profile",
+      },
     ],
   }),
   notFoundComponent: () => (
@@ -92,10 +101,35 @@ function PlayerPage() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="match" stroke="oklch(0.66 0.015 250)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="oklch(0.66 0.015 250)" fontSize={11} tickLine={false} axisLine={false} domain={["dataMin - 50", "dataMax + 50"]} />
-                  <Tooltip contentStyle={{ background: "oklch(0.205 0.01 250)", border: "1px solid oklch(0.28 0.012 250)", borderRadius: 8, fontSize: 12 }} />
-                  <Line type="monotone" dataKey="elo" stroke="oklch(0.72 0.19 45)" strokeWidth={2.5} dot={{ fill: "oklch(0.72 0.19 45)", r: 3 }} />
+                  <XAxis
+                    dataKey="match"
+                    stroke="oklch(0.66 0.015 250)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="oklch(0.66 0.015 250)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    domain={["dataMin - 50", "dataMax + 50"]}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "oklch(0.205 0.01 250)",
+                      border: "1px solid oklch(0.28 0.012 250)",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="elo"
+                    stroke="oklch(0.72 0.19 45)"
+                    strokeWidth={2.5}
+                    dot={{ fill: "oklch(0.72 0.19 45)", r: 3 }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -106,7 +140,15 @@ function PlayerPage() {
   );
 }
 
-function StatTile({ icon: Icon, label, value }: { icon?: React.ComponentType<{ className?: string }>; label: string; value: string }) {
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon?: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
   return (
     <Card className="border-border bg-card p-4">
       <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground">

@@ -38,7 +38,11 @@ function MatchesList() {
                 const img = getMapImage(m.selected_map);
                 return img ? (
                   <div className="relative w-36 shrink-0 overflow-hidden">
-                    <img src={img} alt={m.selected_map ?? ""} className="h-full w-full object-cover" />
+                    <img
+                      src={img}
+                      alt={m.selected_map ?? ""}
+                      className="h-full w-full object-cover"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-background" />
                   </div>
                 ) : null;
@@ -50,21 +54,35 @@ function MatchesList() {
                   </Badge>
                   <span>{m.region}</span>
                   {m.winner ? (
-                    <Badge className={m.winner === "atk" ? "bg-red-500/15 text-red-400" : "bg-blue-500/15 text-blue-400"}>
+                    <Badge
+                      className={
+                        m.winner === "atk"
+                          ? "bg-red-500/15 text-red-400"
+                          : "bg-blue-500/15 text-blue-400"
+                      }
+                    >
                       {m.winner === "atk" ? "ATK" : "DEF"} Wins
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="border-border">Pending</Badge>
+                    <Badge variant="outline" className="border-border">
+                      Pending
+                    </Badge>
                   )}
                 </div>
-                <div className="text-display mt-1 truncate text-base font-bold">{m.selected_map ?? "Voting"}</div>
-                <div className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</div>
+                <div className="text-display mt-1 truncate text-base font-bold">
+                  {m.selected_map ?? "Voting"}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(m.created_at).toLocaleString()}
+                </div>
               </div>
             </Card>
           </Link>
         ))}
         {matches.length === 0 && (
-          <p className="col-span-2 py-10 text-center text-sm text-muted-foreground">No matches yet.</p>
+          <p className="col-span-2 py-10 text-center text-sm text-muted-foreground">
+            No matches yet.
+          </p>
         )}
       </div>
     </div>

@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import favicon from "../assets/JB.webp";
+import favicon from "../assets/CAPL.png";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
 
@@ -79,13 +79,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Jail Bird Matchmaking" },
+      { title: "CAPL | Counter-Blox APL" },
       {
         name: "description",
         content: "Competitive 5v5 ranked matchmaking — queue, track stats, and climb the ladder.",
       },
-      { name: "author", content: "Jail Bird Matchmaking" },
-      { property: "og:title", content: "Jail Bird Matchmaking" },
+      { name: "author", content: "CAPL | Counter-Blox APL" },
+      { property: "og:title", content: "CAPL | Counter-Blox APL" },
       {
         property: "og:description",
         content: "Competitive 5v5 ranked matchmaking — queue, track stats, and climb the ladder.",
@@ -93,7 +93,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:image", content: favicon },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Jail Bird Matchmaking" },
+      { name: "twitter:title", content: "CAPL | Counter-Blox APL" },
     ],
     links: [
       {

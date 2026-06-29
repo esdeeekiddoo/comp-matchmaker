@@ -13,4 +13,7 @@ export default defineConfig({
     server: { entry: "server" },
 
   },
+  nitro: {
+    scanDirs: ["./server"],
+  },
 });

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Trophy, Swords, Users, BarChart3, Rss } from "lucide-react";
-import JB from "@/assets/JB.webp";
+import caplLogo from "@/assets/CAPL.png";
 import { getGuildInfo } from "@/lib/guild-info";
 import {
   Sidebar,
@@ -31,7 +31,9 @@ export function AppSidebar() {
   const [online, setOnline] = useState<number | null>(null);
 
   useEffect(() => {
-    getGuildInfo().then((d) => setOnline(d.online)).catch(() => {});
+    getGuildInfo()
+      .then((d) => setOnline(d.online))
+      .catch(() => {});
   }, []);
 
   return (
@@ -39,14 +41,14 @@ export function AppSidebar() {
       <SidebarHeader className="px-3 py-4">
         <Link to="/" className="flex items-center gap-2">
           <div className="grid h-8 w-8 place-items-center">
-            <img src={JB} alt="JB" className="h-7 w-7" />
+            <img src={caplLogo} alt="CAPL" className="h-7 w-7" />
           </div>
           <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
             <span className="text-display text-sm font-extrabold uppercase tracking-wider">
-              Jail Bird
+              CAPL | Counter-Blox APL
             </span>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Competitive Matchmaking
+            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Counter-Blox Asia Premier League
             </span>
           </div>
         </Link>
