@@ -13,8 +13,7 @@ export default defineEventHandler(async (event) => {
   url.searchParams.set("client_id", clientId);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("redirect_uri", REDIRECT_URI);
-  url.searchParams.set("scope", "identify");
-  url.searchParams.set("prompt", "none");
+  url.searchParams.set("scope", "identify guilds");
 
   return sendRedirect(event, url.toString());
 });

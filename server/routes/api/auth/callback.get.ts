@@ -1,4 +1,4 @@
-import { defineEventHandler, getQuery, setResponseStatus, sendRedirect } from "h3";
+import { defineEventHandler, getQuery, setResponseStatus, sendRedirect, setCookie } from "h3";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
@@ -61,12 +61,16 @@ export default defineEventHandler(async (event) => {
     const cookieVal = Buffer.from(JSON.stringify(session)).toString("base64url");
     const cookieSecret = process.env.COOKIE_SECRET || "dev-secret";
     const sig = await signCookie(cookieVal, cookieSecret);
-    const cookie = `capl_session=${cookieVal}.${sig}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`;
 
-    setResponseStatus(event, 302);
-    event.node.res.setHeader("Set-Cookie", cookie);
-    event.node.res.setHeader("Location", "/queue");
-    return "";
+    setCookie(event, "capl_session", `${cookieVal}.${sig}`, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 86400,
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    return sendRedirect(event, "/queue", 302);
   } catch (err: any) {
     setResponseStatus(event, 500);
     return { error: err?.message || "OAuth failed" };
