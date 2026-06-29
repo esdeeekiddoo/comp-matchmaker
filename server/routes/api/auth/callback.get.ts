@@ -62,12 +62,17 @@ export default defineEventHandler(async (event) => {
     const cookieSecret = process.env.COOKIE_SECRET || "dev-secret";
     const sig = await signCookie(cookieVal, cookieSecret);
 
+    // Debug logging
+    console.log("Setting cookie for user:", session.username);
+    console.log("Cookie value length:", cookieVal.length);
+    console.log("Is production:", process.env.NODE_ENV === "production");
+
     setCookie(event, "capl_session", `${cookieVal}.${sig}`, {
       path: "/",
-      httpOnly: true,
+      httpOnly: false, // Changed to false for debugging - allows JS to read it
       sameSite: "lax",
       maxAge: 86400,
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Changed to false for debugging
     });
 
     return sendRedirect(event, "/queue", 302);
