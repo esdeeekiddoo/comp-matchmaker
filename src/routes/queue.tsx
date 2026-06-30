@@ -17,6 +17,7 @@ import {
   Swords, Users, LogIn, Loader2, Clock, Zap, Trophy, Target,
   UserPlus, UserMinus, UserCheck, X, PartyPopper,
 } from "lucide-react";
+import { toast } from "sonner";
 
 type QueuePlayer = {
   user_id: string;
@@ -192,7 +193,10 @@ function QueuePage() {
       const data = await res.json();
       if (data.ok) {
         setMyParty(data.party);
+        toast.success("Party created!");
         await fetchQueue();
+      } else {
+        toast.error(data.error || "Failed to create party");
       }
     } finally {
       setPartyLoading(false);
@@ -203,21 +207,27 @@ function QueuePage() {
     if (!myParty || !session) return;
     setPartyLoading(true);
     try {
-      await fetch("/api/party/leave", {
+      const res = await fetch("/api/party/leave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ partyId: myParty.id }),
       });
-      setMyParty(null);
-      await fetchQueue();
-      await fetchParty();
+      const data = await res.json();
+      if (data.ok) {
+        setMyParty(null);
+        toast.success(isPartyLeader ? "Party disbanded" : "Left party");
+        await fetchQueue();
+        await fetchParty();
+      } else {
+        toast.error(data.error || "Failed to leave party");
+      }
     } finally {
       setPartyLoading(false);
     }
   }
 
   async function handleInvite(targetUserId: string, targetUsername: string) {
-    if (!myParty || !session) return;
+    if (!myParty || !session) return { ok: false, error: "Not logged in" };
     const res = await fetch("/api/party/invite", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -227,19 +237,31 @@ function QueuePage() {
         targetUsername,
       }),
     });
-    return res.json();
+    const data = await res.json();
+    if (data.ok) {
+      toast.success(`Invited ${targetUsername}`);
+    } else {
+      toast.error(data.error || "Failed to send invite");
+    }
+    return data;
   }
 
   async function handleAcceptInvite(invite: Invite) {
     setPartyLoading(true);
     try {
-      await fetch("/api/party/accept", {
+      const res = await fetch("/api/party/accept", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ partyId: invite.party_id }),
       });
-      await fetchParty();
-      await fetchQueue();
+      const data = await res.json();
+      if (data.ok) {
+        toast.success("Joined party!");
+        await fetchParty();
+        await fetchQueue();
+      } else {
+        toast.error(data.error || "Failed to accept invite");
+      }
     } finally {
       setPartyLoading(false);
     }
