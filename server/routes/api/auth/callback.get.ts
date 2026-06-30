@@ -62,17 +62,32 @@ export default defineEventHandler(async (event) => {
     const cookieSecret = process.env.COOKIE_SECRET || "dev-secret";
     const sig = await signCookie(cookieVal, cookieSecret);
 
-    // Debug logging
-    console.log("Setting cookie for user:", session.username);
-    console.log("Cookie value length:", cookieVal.length);
-    console.log("Is production:", process.env.NODE_ENV === "production");
+    // Save user to players table
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+    if (supabaseUrl && supabaseKey) {
+      fetch(`${supabaseUrl}/rest/v1/players`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates",
+        },
+        body: JSON.stringify({
+          discord_id: session.user_id,
+          username: session.username,
+          avatar_url: session.avatar_url,
+        }),
+      }).catch(() => {});
+    }
 
     setCookie(event, "capl_session", `${cookieVal}.${sig}`, {
       path: "/",
-      httpOnly: false, // Changed to false for debugging - allows JS to read it
+      httpOnly: false,
       sameSite: "lax",
       maxAge: 86400,
-      secure: false, // Changed to false for debugging
+      secure: process.env.NODE_ENV === "production",
     });
 
     return sendRedirect(event, "/queue", 302);
