@@ -78,6 +78,7 @@ function QueuePage() {
   const [partyLoading, setPartyLoading] = useState(false);
   const [allUsers, setAllUsers] = useState<QueuePlayer[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     setSession(parseSession());
@@ -278,6 +279,9 @@ function QueuePage() {
   const availableToInvite = (allUsers.length > 0 ? allUsers : players).filter(
     (p) => !partyMembers.includes(p.user_id) && p.user_id !== session?.user_id,
   );
+  const filteredUsers = availableToInvite.filter((p) =>
+    p.username.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   const fetchUsers = useCallback(async () => {
     setUsersLoading(true);
@@ -473,7 +477,7 @@ function QueuePage() {
                 <div className="flex gap-3">
                   {isPartyLeader && (
                     <Button
-                      onClick={() => { setShowInviteModal(true); fetchUsers(); }}
+                      onClick={() => { setShowInviteModal(true); setSearchQuery(""); fetchUsers(); }}
                       variant="outline"
                       className="flex-1 gap-2"
                       disabled={partyMembers.length >= 3}
@@ -507,38 +511,51 @@ function QueuePage() {
             <DialogHeader>
               <DialogTitle>Invite to Party</DialogTitle>
               <DialogDescription>
-                Select a player from the queue to invite.
+                Search and select a player to invite.
               </DialogDescription>
             </DialogHeader>
-            <div className="max-h-60 space-y-2 overflow-y-auto">
-              {availableToInvite.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                  No players available to invite
-                </p>
-              ) : (
-                availableToInvite.map((p) => (
-                  <button
-                    key={p.user_id}
-                    onClick={async () => {
-                      const result = await handleInvite(p.user_id, p.username);
-                      if (result.ok) setShowInviteModal(false);
-                    }}
-                    className="flex w-full items-center gap-3 rounded-lg border border-border bg-muted/30 p-3 text-left transition-colors hover:bg-muted/50"
-                  >
-                    <Avatar className="h-9 w-9 border border-border">
-                      <AvatarImage src={p.avatar_url} alt={p.username} />
-                      <AvatarFallback>{p.username.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium">{p.username}</div>
-                      <div className="text-xs text-muted-foreground">
-                        In queue {getTimeInQueue(p.joined_at)}
+            <div className="space-y-3">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search players..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-muted/50 px-3 py-2 pl-9 text-sm outline-none focus:border-primary"
+                />
+                <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              </div>
+              <div className="max-h-72 space-y-2 overflow-y-auto">
+                {usersLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : filteredUsers.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    {searchQuery ? "No players match your search" : "No players available to invite"}
+                  </p>
+                ) : (
+                  filteredUsers.map((p) => (
+                    <button
+                      key={p.user_id}
+                      onClick={async () => {
+                        const result = await handleInvite(p.user_id, p.username);
+                        if (result.ok) setShowInviteModal(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-lg border border-border bg-muted/30 p-3 text-left transition-colors hover:bg-muted/50"
+                    >
+                      <Avatar className="h-9 w-9 border border-border">
+                        <AvatarImage src={p.avatar_url} alt={p.username} />
+                        <AvatarFallback>{p.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium">{p.username}</div>
                       </div>
-                    </div>
-                    <UserPlus className="h-4 w-4 text-primary" />
-                  </button>
-                ))
-              )}
+                      <UserPlus className="h-4 w-4 shrink-0 text-primary" />
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
           </DialogContent>
         </Dialog>
