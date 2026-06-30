@@ -61,7 +61,7 @@ function MatchesList() {
                           : "bg-blue-500/15 text-blue-400"
                       }
                     >
-                      {m.winner === "atk" ? "ATK" : "DEF"} Wins
+                      {m.winner === "atk" ? "T" : "CT"} Wins
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="border-border">

@@ -110,14 +110,14 @@ function MatchPage() {
           <div
             className={`text-right ${winner === "atk" ? "text-success" : "text-muted-foreground"}`}
           >
-            <div className="text-[10px] uppercase tracking-wider">ATK</div>
+            <div className="text-[10px] uppercase tracking-wider">T</div>
             <div className="text-display text-3xl font-extrabold">
               {winner === "atk" ? "WIN" : "LOSS"}
             </div>
           </div>
           <div className="text-display text-xl font-bold text-muted-foreground">VS</div>
           <div className={`${winner === "def" ? "text-success" : "text-muted-foreground"}`}>
-            <div className="text-[10px] uppercase tracking-wider">DEF</div>
+            <div className="text-[10px] uppercase tracking-wider">CT</div>
             <div className="text-display text-3xl font-extrabold">
               {winner === "def" ? "WIN" : "LOSS"}
             </div>
@@ -127,7 +127,7 @@ function MatchPage() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         <TeamCard
-          label="ATK"
+          label="T"
           players={match.atk_team}
           hostId={match.host_id}
           winner={winner}
@@ -136,7 +136,7 @@ function MatchPage() {
           eloChanges={eloChanges}
         />
         <TeamCard
-          label="DEF"
+          label="CT"
           players={match.def_team}
           hostId={match.host_id}
           winner={winner}
