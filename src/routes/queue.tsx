@@ -76,6 +76,8 @@ function QueuePage() {
   const [pendingInvites, setPendingInvites] = useState<Invite[]>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [partyLoading, setPartyLoading] = useState(false);
+  const [allUsers, setAllUsers] = useState<QueuePlayer[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
 
   useEffect(() => {
     setSession(parseSession());
@@ -273,9 +275,22 @@ function QueuePage() {
   }
 
   const isPartyLeader = myParty?.leader_id === session?.user_id;
-  const availableToInvite = players.filter(
+  const availableToInvite = (allUsers.length > 0 ? allUsers : players).filter(
     (p) => !partyMembers.includes(p.user_id) && p.user_id !== session?.user_id,
   );
+
+  const fetchUsers = useCallback(async () => {
+    setUsersLoading(true);
+    try {
+      const res = await fetch("/api/users");
+      const data = await res.json();
+      if (data.players) setAllUsers(data.players);
+    } catch {
+      // ignore
+    } finally {
+      setUsersLoading(false);
+    }
+  }, []);
 
   return (
     <AppShell>
@@ -458,7 +473,7 @@ function QueuePage() {
                 <div className="flex gap-3">
                   {isPartyLeader && (
                     <Button
-                      onClick={() => setShowInviteModal(true)}
+                      onClick={() => { setShowInviteModal(true); fetchUsers(); }}
                       variant="outline"
                       className="flex-1 gap-2"
                       disabled={partyMembers.length >= 3}
