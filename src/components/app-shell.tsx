@@ -7,6 +7,7 @@ import { avatarUrl } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { BackgroundEffects } from "@/components/background-effects";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -43,6 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
+        <BackgroundEffects />
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-3 backdrop-blur-md sm:px-5">

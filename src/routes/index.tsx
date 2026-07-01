@@ -107,11 +107,10 @@ function Hero({
           <Flame className="h-3 w-3" /> Season 1
         </Badge>
         <h1 className="text-display text-3xl font-extrabold leading-tight sm:text-5xl">
-          Queue Smarter. <span className="text-primary">Climb Harder.</span>
+          Home of <span className="text-primary">Asia CounterBlox</span>
         </h1>
         <p className="max-w-lg text-sm text-muted-foreground sm:text-base">
-          CAPL | Counter-Blox Asia Premier League — competitive 5v5 ranked matchmaking. Queue
-          through Discord, track your stats, and climb the leaderboard.
+          CAPL | Counter-Blox Asia Premier League — Home of Asia Counter-Blox Series. Climb to the Leaderboards!
         </p>
         <div className="flex flex-wrap gap-3">
           {!session ? (

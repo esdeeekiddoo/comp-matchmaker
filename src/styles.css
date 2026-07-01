@@ -150,3 +150,12 @@
   font-size: 0.875rem;
   color: var(--color-primary);
 }
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.6; }
+}
+
+.crackle-line {
+  animation: flicker 2.5s ease-in-out infinite;
+}
