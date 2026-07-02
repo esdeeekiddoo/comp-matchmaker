@@ -68,6 +68,35 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
     }
   }, [match.selected_map]);
 
+  useEffect(() => {
+    if (timeLeft !== 0 || selectedMap) return;
+    console.log("[ban-overlay] timeLeft=0, starting auto-pick polling");
+    const interval = setInterval(async () => {
+      try {
+        const remaining = MAP_POOL.filter((m) => !bans.includes(m));
+        if (remaining.length === 0) return;
+        const res = await fetch("/api/match/ban", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: session.user_id, matchId: match.id, mapName: remaining[0] }),
+        });
+        const data = await res.json();
+        console.log("[ban-overlay] auto-pick response:", data);
+        if (data.ok) {
+          setBans(data.bans);
+          if (data.selected_map) {
+            setSelectedMap(data.selected_map);
+            clearInterval(interval);
+            setTimeout(onMapSelected, 2000);
+          }
+        }
+      } catch (err) {
+        console.error("[ban-overlay] auto-pick error:", err);
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [timeLeft]);
+
   const handleBan = useCallback(async (mapName: string) => {
     if (!canBan || banning) return;
     setBanning(mapName);

@@ -2,6 +2,37 @@ import { defineEventHandler, readBody, setResponseStatus } from "h3";
 
 const MAPS = ["Mirage", "Dust", "Inferno", "Cache", "Nuke", "Overpass", "Train"];
 
+async function notifyDiscord(match: any, picked: string) {
+  const token = process.env.DISCORD_TOKEN;
+  if (!token) { console.log("[notifyDiscord] DISCORD_TOKEN not set"); return; }
+  if (!match.host_chat_channel_id) { console.log("[notifyDiscord] host_chat_channel_id missing"); return; }
+  const embed = {
+    color: 0xf97316,
+    title: `Match #${match.match_number} — Map Selected`,
+    fields: [
+      { name: "🗺️ Map", value: picked, inline: false },
+    ],
+  };
+  try {
+    console.log(`[notifyDiscord] sending to channel ${match.host_chat_channel_id}`);
+    const res = await fetch(
+      `https://discord.com/api/v10/channels/${match.host_chat_channel_id}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bot ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ embeds: [embed] }),
+      },
+    );
+    const body = await res.text();
+    console.log(`[notifyDiscord] response ${res.status}: ${body}`);
+  } catch (err) {
+    console.error("[notifyDiscord] error:", err);
+  }
+}
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event).catch(() => ({}));
   const { userId, matchId, mapName } = body;
@@ -19,8 +50,9 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    console.log(`[ban] request: userId=${userId}, matchId=${matchId}, mapName=${mapName}`);
     const matchRes = await fetch(
-      `${url}/rest/v1/matches?id=eq.${matchId}&select=bans,banners,selected_map,atk_team,def_team`,
+      `${url}/rest/v1/matches?id=eq.${matchId}&select=bans,banners,selected_map,atk_team,def_team,host_chat_channel_id,match_number,region`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` } },
     );
     const matches = await matchRes.json();
@@ -33,17 +65,11 @@ export default defineEventHandler(async (event) => {
       return { ok: false, error: "Map already selected" };
     }
 
-    const banners = match.banners || {};
-    if (banners.atk !== userId && banners.def !== userId) {
-      setResponseStatus(event, 403);
-      return { ok: false, error: "You are not a designated banner" };
-    }
-
     const currentBans: string[] = match.bans || [];
 
-    // If deadline passed, auto-pick from remaining
     const expired = match.ban_deadline && new Date(match.ban_deadline).getTime() < Date.now();
     if (expired) {
+      console.log(`[ban] deadline expired for match ${matchId}, auto-picking`);
       const remaining = MAPS.filter((m) => !currentBans.includes(m));
       const picked = remaining[Math.floor(Math.random() * remaining.length)] || MAPS[0];
       await fetch(`${url}/rest/v1/matches?id=eq.${matchId}`, {
@@ -55,7 +81,16 @@ export default defineEventHandler(async (event) => {
         },
         body: JSON.stringify({ selected_map: picked, bans: null, banners: null, ban_deadline: null }),
       });
+      console.log(`[ban] auto-picked map: ${picked}`);
+      notifyDiscord(match, picked);
       return { ok: true, bans: currentBans, selected_map: picked };
+    }
+
+    const banners = match.banners || {};
+    if (banners.atk !== userId && banners.def !== userId) {
+      console.log(`[ban] user ${userId} is not a banner (atk=${banners.atk}, def=${banners.def})`);
+      setResponseStatus(event, 403);
+      return { ok: false, error: "You are not a designated banner" };
     }
 
     if (currentBans.includes(mapName)) {
@@ -90,6 +125,7 @@ export default defineEventHandler(async (event) => {
       body: JSON.stringify(updateBody),
     });
 
+    if (selectedMap) notifyDiscord(match, selectedMap);
     return { ok: true, bans: newBans, selected_map: selectedMap };
   } catch (err: any) {
     setResponseStatus(event, 500);

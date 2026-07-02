@@ -24,6 +24,7 @@ export type MatchRow = {
   category_id: string | null;
   atk_channel_id: string | null;
   def_channel_id: string | null;
+  host_chat_channel_id: string | null;
   created_at: string;
   bans: string[] | null;
   banners: Record<string, string> | null;
@@ -171,7 +172,7 @@ export async function getPlayerMatches(discordId: string, limit = 10): Promise<M
     .from("matches")
     .select("id, region, match_number, atk_team, def_team, selected_map, winner, elo_changes, created_at")
     .eq("status", "ended")
-    .or(`atk_team.cs.["${discordId}"],def_team.cs.["${discordId}"]`)
+    .or(`atk_team.cs.{"${discordId}"},def_team.cs.{"${discordId}"}`)
     .order("created_at", { ascending: false })
     .limit(limit);
   return (data ?? []) as MatchRow[];
@@ -182,7 +183,7 @@ export async function getActiveMatchForUser(userId: string): Promise<BanMatchRow
     .from("matches")
     .select("id, match_number, region, atk_team, def_team, selected_map, status, bans, banners, ban_deadline, created_at")
     .eq("status", "active")
-    .or(`atk_team.cs.["${userId}"],def_team.cs.["${userId}"]`);
+    .or(`atk_team.cs.{"${userId}"},def_team.cs.{"${userId}"}`);
   if (!data || data.length === 0) return null;
   return data[0] as BanMatchRow | null;
 }

@@ -18,7 +18,7 @@ import {
   UserPlus, UserMinus, UserCheck, X, PartyPopper,
 } from "lucide-react";
 import { toast } from "sonner";
-import { avatarUrl, getActiveMatchForUser } from "@/lib/supabase-queries";
+import { avatarUrl, getActiveMatchForUser, getPlayersByIds } from "@/lib/supabase-queries";
 import { BanOverlay } from "@/components/ban-overlay";
 
 type QueuePlayer = {
@@ -82,6 +82,7 @@ function QueuePage() {
   const [usersLoading, setUsersLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeMatch, setActiveMatch] = useState<any>(null);
+  const [matchPlayers, setMatchPlayers] = useState<{ user_id: string; username: string; avatar_url: string }[]>([]);
 
   useEffect(() => {
     setSession(parseSession());
@@ -124,11 +125,16 @@ function QueuePage() {
       if (match) {
         if (match.selected_map) {
           setActiveMatch(null);
+          setMatchPlayers([]);
         } else {
           setActiveMatch(match);
+          const allIds = [...new Set([...match.atk_team, ...match.def_team])];
+          const rows = await getPlayersByIds(allIds);
+          setMatchPlayers(rows.map((r) => ({ user_id: r.discord_id, username: r.username || "Unknown", avatar_url: r.avatar_url || "" })));
         }
       } else {
         setActiveMatch(null);
+        setMatchPlayers([]);
       }
     } catch {
       // ignore polling errors
@@ -689,8 +695,8 @@ function QueuePage() {
           <BanOverlay
             match={activeMatch}
             session={session}
-            players={players}
-            onMapSelected={() => setActiveMatch(null)}
+            players={matchPlayers}
+            onMapSelected={() => { setActiveMatch(null); setMatchPlayers([]); }}
           />
         )}
       </AnimatePresence>

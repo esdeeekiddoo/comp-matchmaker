@@ -39,3 +39,4 @@ SETUP_CREDENTIALS.md
 *.sw?
 
 .vercel
+.env*
