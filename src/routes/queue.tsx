@@ -18,7 +18,8 @@ import {
   UserPlus, UserMinus, UserCheck, X, PartyPopper,
 } from "lucide-react";
 import { toast } from "sonner";
-import { avatarUrl } from "@/lib/supabase-queries";
+import { avatarUrl, getActiveMatchForUser } from "@/lib/supabase-queries";
+import { BanOverlay } from "@/components/ban-overlay";
 
 type QueuePlayer = {
   user_id: string;
@@ -80,6 +81,7 @@ function QueuePage() {
   const [allUsers, setAllUsers] = useState<QueuePlayer[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeMatch, setActiveMatch] = useState<any>(null);
 
   useEffect(() => {
     setSession(parseSession());
@@ -115,6 +117,24 @@ function QueuePage() {
     }
   }, [session]);
 
+  const fetchActiveMatch = useCallback(async () => {
+    if (!session) return;
+    try {
+      const match = await getActiveMatchForUser(session.user_id);
+      if (match) {
+        if (match.selected_map) {
+          setActiveMatch(null);
+        } else {
+          setActiveMatch(match);
+        }
+      } else {
+        setActiveMatch(null);
+      }
+    } catch {
+      // ignore polling errors
+    }
+  }, [session]);
+
   useEffect(() => {
     fetchQueue();
     const interval = setInterval(fetchQueue, 3000);
@@ -126,6 +146,12 @@ function QueuePage() {
     const interval = setInterval(fetchParty, 3000);
     return () => clearInterval(interval);
   }, [fetchParty]);
+
+  useEffect(() => {
+    fetchActiveMatch();
+    const interval = setInterval(fetchActiveMatch, 3000);
+    return () => clearInterval(interval);
+  }, [fetchActiveMatch]);
 
   const inQueue = session ? players.some((p) => p.user_id === session.user_id) : false;
   const myPlayer = session ? players.find((p) => p.user_id === session.user_id) : null;
@@ -656,6 +682,18 @@ function QueuePage() {
           </div>
         </Card>
       </div>
+
+      {/* Match Found Overlay */}
+      <AnimatePresence>
+        {activeMatch && session && (
+          <BanOverlay
+            match={activeMatch}
+            session={session}
+            players={players}
+            onMapSelected={() => setActiveMatch(null)}
+          />
+        )}
+      </AnimatePresence>
     </AppShell>
   );
 }

@@ -25,6 +25,15 @@ export type MatchRow = {
   atk_channel_id: string | null;
   def_channel_id: string | null;
   created_at: string;
+  bans: string[] | null;
+  banners: Record<string, string> | null;
+  ban_deadline: string | null;
+};
+
+export type BanMatchRow = MatchRow & {
+  bans: string[];
+  banners: Record<string, string>;
+  ban_deadline: string;
 };
 
 export async function getPlayers(): Promise<PlayerRow[]> {
@@ -166,4 +175,23 @@ export async function getPlayerMatches(discordId: string, limit = 10): Promise<M
     .order("created_at", { ascending: false })
     .limit(limit);
   return (data ?? []) as MatchRow[];
+}
+
+export async function getActiveMatchForUser(userId: string): Promise<BanMatchRow | null> {
+  const { data } = await supabase
+    .from("matches")
+    .select("id, match_number, region, atk_team, def_team, selected_map, status, bans, banners, ban_deadline, created_at")
+    .eq("status", "active")
+    .or(`atk_team.cs.{${userId}},def_team.cs.{${userId}}`);
+  if (!data || data.length === 0) return null;
+  return data[0] as BanMatchRow | null;
+}
+
+export async function submitBan(matchId: string, userId: string, mapName: string) {
+  const res = await fetch("/api/match/ban", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, matchId, mapName }),
+  });
+  return res.json();
 }
