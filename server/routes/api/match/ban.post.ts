@@ -2,10 +2,10 @@ import { defineEventHandler, readBody, setResponseStatus } from "h3";
 
 const MAPS = ["Mirage", "Dust", "Inferno", "Cache", "Nuke", "Overpass", "Train"];
 
-async function notifyDiscord(match: any, picked: string) {
+async function notifyDiscord(match: any, picked: string): Promise<{ notified: boolean; error?: string }> {
   const token = process.env.DISCORD_TOKEN;
-  if (!token) { console.log("[notifyDiscord] DISCORD_TOKEN not set"); return; }
-  if (!match.host_chat_channel_id) { console.log("[notifyDiscord] host_chat_channel_id missing"); return; }
+  if (!token) { console.log("[notifyDiscord] DISCORD_TOKEN not set"); return { notified: false, error: "DISCORD_TOKEN not set in env" }; }
+  if (!match.host_chat_channel_id) { console.log("[notifyDiscord] host_chat_channel_id missing"); return { notified: false, error: "host_chat_channel_id is null in match row" }; }
   const embed = {
     color: 0xf97316,
     title: `Match #${match.match_number} — Map Selected`,
@@ -28,8 +28,11 @@ async function notifyDiscord(match: any, picked: string) {
     );
     const body = await res.text();
     console.log(`[notifyDiscord] response ${res.status}: ${body}`);
-  } catch (err) {
+    if (!res.ok) return { notified: false, error: `Discord API ${res.status}: ${body}` };
+    return { notified: true };
+  } catch (err: any) {
     console.error("[notifyDiscord] error:", err);
+    return { notified: false, error: err?.message || String(err) };
   }
 }
 
@@ -82,8 +85,8 @@ export default defineEventHandler(async (event) => {
         body: JSON.stringify({ selected_map: picked, bans: null, banners: null, ban_deadline: null }),
       });
       console.log(`[ban] auto-picked map: ${picked}`);
-      await notifyDiscord(match, picked);
-      return { ok: true, bans: currentBans, selected_map: picked };
+      const notifyResult = await notifyDiscord(match, picked);
+      return { ok: true, bans: currentBans, selected_map: picked, discord: notifyResult };
     }
 
     const banners = match.banners || {};
@@ -125,8 +128,9 @@ export default defineEventHandler(async (event) => {
       body: JSON.stringify(updateBody),
     });
 
-    if (selectedMap) await notifyDiscord(match, selectedMap);
-    return { ok: true, bans: newBans, selected_map: selectedMap };
+    let notifyResult = { notified: false, error: "not called" };
+    if (selectedMap) notifyResult = await notifyDiscord(match, selectedMap);
+    return { ok: true, bans: newBans, selected_map: selectedMap, discord: notifyResult };
   } catch (err: any) {
     setResponseStatus(event, 500);
     return { ok: false, error: err?.message || "Failed to submit ban" };
