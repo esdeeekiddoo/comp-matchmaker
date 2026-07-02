@@ -183,7 +183,9 @@ export async function getActiveMatchForUser(userId: string): Promise<BanMatchRow
     .from("matches")
     .select("id, match_number, region, atk_team, def_team, selected_map, status, bans, banners, ban_deadline, created_at")
     .eq("status", "active")
-    .or(`atk_team.cs.{"${userId}"},def_team.cs.{"${userId}"}`);
+    .or(`atk_team.cs.{"${userId}"},def_team.cs.{"${userId}"}`)
+    .order("created_at", { ascending: false })
+    .limit(1);
   if (!data || data.length === 0) return null;
   return data[0] as BanMatchRow | null;
 }

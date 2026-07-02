@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
         body: JSON.stringify({ selected_map: picked, bans: null, banners: null, ban_deadline: null }),
       });
       console.log(`[ban] auto-picked map: ${picked}`);
-      notifyDiscord(match, picked);
+      await notifyDiscord(match, picked);
       return { ok: true, bans: currentBans, selected_map: picked };
     }
 
@@ -125,7 +125,7 @@ export default defineEventHandler(async (event) => {
       body: JSON.stringify(updateBody),
     });
 
-    if (selectedMap) notifyDiscord(match, selectedMap);
+    if (selectedMap) await notifyDiscord(match, selectedMap);
     return { ok: true, bans: newBans, selected_map: selectedMap };
   } catch (err: any) {
     setResponseStatus(event, 500);
