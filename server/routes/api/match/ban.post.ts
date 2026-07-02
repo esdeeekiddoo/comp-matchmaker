@@ -19,7 +19,6 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // Fetch current match
     const matchRes = await fetch(
       `${url}/rest/v1/matches?id=eq.${matchId}&select=bans,banners,selected_map,atk_team,def_team`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` } },
@@ -34,28 +33,18 @@ export default defineEventHandler(async (event) => {
       return { ok: false, error: "Map already selected" };
     }
 
-    // Check user is a designated banner
     const banners = match.banners || {};
     if (banners.atk !== userId && banners.def !== userId) {
       setResponseStatus(event, 403);
       return { ok: false, error: "You are not a designated banner" };
     }
 
-    // Check map not already banned
-    const bans: string[] = match.bans || [];
-    if (bans.includes(mapName)) {
-      return { ok: false, error: "Map already banned" };
-    }
-    if (!MAPS.includes(mapName)) {
-      return { ok: false, error: "Invalid map name" };
-    }
+    const currentBans: string[] = match.bans || [];
 
-    // Check deadline hasn't passed — if expired, auto-pick from remaining
+    // If deadline passed, auto-pick from remaining
     const expired = match.ban_deadline && new Date(match.ban_deadline).getTime() < Date.now();
-    const bannedList: string[] = match.bans || [];
-
     if (expired) {
-      const remaining = MAPS.filter((m) => !bannedList.includes(m));
+      const remaining = MAPS.filter((m) => !currentBans.includes(m));
       const picked = remaining[Math.floor(Math.random() * remaining.length)] || MAPS[0];
       await fetch(`${url}/rest/v1/matches?id=eq.${matchId}`, {
         method: "PATCH",
@@ -66,28 +55,24 @@ export default defineEventHandler(async (event) => {
         },
         body: JSON.stringify({ selected_map: picked, bans: null, banners: null, ban_deadline: null }),
       });
-      return { ok: true, bans: bannedList, selected_map: picked };
+      return { ok: true, bans: currentBans, selected_map: picked };
     }
 
-    // Check map not already banned
-    const bans: string[] = match.bans || [];
-    if (bans.includes(mapName)) {
+    if (currentBans.includes(mapName)) {
       return { ok: false, error: "Map already banned" };
     }
     if (!MAPS.includes(mapName)) {
       return { ok: false, error: "Invalid map name" };
     }
 
-    const newBans = [...bans, mapName];
+    const newBans = [...currentBans, mapName];
     const remaining = MAPS.filter((m) => !newBans.includes(m));
 
-    // If 2 bans are in, auto-pick the map
     let selectedMap: string | null = null;
     if (newBans.length >= 2 && remaining.length > 0) {
       selectedMap = remaining[Math.floor(Math.random() * remaining.length)];
     }
 
-    // Update match
     const updateBody: any = { bans: newBans };
     if (selectedMap) {
       updateBody.selected_map = selectedMap;
