@@ -20,8 +20,8 @@ export const Route = createFileRoute("/players/$username")({
     meta: [
       {
         title: loaderData
-          ? `${loaderData.player.username ?? loaderData.player.discord_id} — CAPL | Counter-Blox APL`
-          : "Player — CAPL | Counter-Blox APL",
+          ? `${loaderData.player.username ?? loaderData.player.discord_id} — APL`
+          : "Player — APL",
       },
       {
         name: "description",

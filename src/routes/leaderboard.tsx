@@ -28,9 +28,9 @@ export const Route = createFileRoute("/leaderboard")({
   },
   head: () => ({
     meta: [
-      { title: "Leaderboard — CAPL | Counter-Blox APL" },
+      { title: "Leaderboard — APL" },
       { name: "description", content: "Top ranked 5v5 players sorted by ELO." },
-      { property: "og:title", content: "CAPL | Counter-Blox APL — Leaderboard" },
+      { property: "og:title", content: "APL — Leaderboard" },
       { property: "og:description", content: "Climb the ranked ladder." },
     ],
   }),

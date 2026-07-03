@@ -41,14 +41,14 @@ export function AppSidebar() {
       <SidebarHeader className="px-3 py-4">
         <Link to="/" className="flex items-center gap-2">
           <div className="grid h-8 w-8 place-items-center">
-            <img src={caplLogo} alt="CAPL" className="h-7 w-7" />
+            <img src={caplLogo} alt="APL" className="h-7 w-7" />
           </div>
           <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
             <span className="text-display text-sm font-extrabold uppercase tracking-wider">
-              CAPL | Counter-Blox APL
+              APL | Asia Premiere League
             </span>
             <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Counter-Blox Asia Premier League
+              Asia Premiere League
             </span>
           </div>
         </Link>

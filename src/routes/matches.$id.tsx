@@ -24,8 +24,8 @@ export const Route = createFileRoute("/matches/$id")({
     meta: [
       {
         title: loaderData
-          ? `Match #${loaderData.match.match_number} — CAPL | Counter-Blox APL`
-          : "Match — CAPL | Counter-Blox APL",
+          ? `Match #${loaderData.match.match_number} — APL`
+          : "Match — APL",
       },
       {
         name: "description",

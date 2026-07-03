@@ -31,9 +31,9 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "CAPL | Counter-Blox APL" },
+      { title: "APL | Asia Premiere League" },
       { name: "description", content: "Track ranks, ELO, stats and match history." },
-      { property: "og:title", content: "CAPL | Counter-Blox APL" },
+      { property: "og:title", content: "APL | Asia Premiere League" },
       { property: "og:description", content: "Climb the ladder. Queue from our website." },
     ],
   }),
@@ -77,21 +77,21 @@ function Hero({
       transition={{ duration: 0.4 }}
       className="relative overflow-hidden rounded-xl border border-border"
     >
-      <img
-        src={hero}
-        alt="CAPL"
-        className="absolute inset-0 h-full w-full object-cover opacity-70"
-      />
+        <img
+          src={hero}
+          alt="APL"
+          className="absolute inset-0 h-full w-full object-cover opacity-70"
+        />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent" />
       <div className="relative grid gap-5 p-6 sm:p-10 md:max-w-2xl">
         <Badge className="w-fit gap-1 bg-primary/15 text-primary hover:bg-primary/20">
           <Flame className="h-3 w-3" /> Season 1
         </Badge>
         <h1 className="text-display text-3xl font-extrabold leading-tight sm:text-5xl">
-          Home of <span className="text-primary">Asia CounterBlox</span>
+          <span className="text-primary">Asia Premiere League</span>
         </h1>
         <p className="max-w-lg text-sm text-muted-foreground sm:text-base">
-          CAPL | Counter-Blox Asia Premier League — Home of Asia Counter-Blox Series. Climb to the Leaderboards!
+          APL | Asia Premiere League — Ranked matchmaking, leaderboards, and competitive play. Climb to the top!
         </p>
         <div className="flex flex-wrap gap-3">
           {!session ? (

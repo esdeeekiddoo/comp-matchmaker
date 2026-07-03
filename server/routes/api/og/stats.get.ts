@@ -100,8 +100,8 @@ function buildCard(player: any, history: any[], rank: { name: string; color: str
       statTile("Trend", trend, trend.startsWith("+") ? GREEN : trend.startsWith("-") ? RED : MUTED),
     ),
     h("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", marginTop: "auto", padding: "10px 0", gap: 1 } },
-      h("span", { style: { color: MUTED, fontSize: 11, fontFamily: "Russo One" } }, guildId ? "BloxArena" : "CAPL"),
-      h("span", { style: { color: MUTED, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2 } }, guildId ? "Competitive Arena" : "Counter-Blox Asia Premier League"),
+      h("span", { style: { color: MUTED, fontSize: 11, fontFamily: "Russo One" } }, "APL"),
+      h("span", { style: { color: MUTED, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2 } }, "Asia Premiere League"),
     ),
   );
 }

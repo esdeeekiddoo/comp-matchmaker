@@ -2,7 +2,7 @@ export type Session = {
   user_id: string;
   username: string;
   avatar_url: string;
-  guild_ids: { id: string; name: string }[];
+  guild_ids: { id: string; name: string; game_name?: string }[];
 };
 
 export function getCookie(name: string): string | null {

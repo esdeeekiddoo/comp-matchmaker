@@ -4,9 +4,9 @@ import { AppShell } from "@/components/app-shell";
 export const Route = createFileRoute("/matches")({
   head: () => ({
     meta: [
-      { title: "Match History — CAPL | Counter-Blox APL" },
+      { title: "Match History — APL" },
       { name: "description", content: "Recent 5v5 ranked matches." },
-      { property: "og:title", content: "CAPL | Counter-Blox APL — Match History" },
+      { property: "og:title", content: "APL — Match History" },
     ],
   }),
   component: MatchesLayout,

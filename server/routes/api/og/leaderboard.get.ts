@@ -113,8 +113,8 @@ export default defineEventHandler(async (event) => {
     const columnHeaderHeight = 34;
     const footerHeight = 44;
     const totalHeight = headerHeight + columnHeaderHeight + rowCount * rowHeight + footerHeight;
-    const gameTitle = guildId ? "BloxArena" : "CAPL";
-    const gameSubtitle = guildId ? "Competitive Arena" : "Counter-Blox Asia Premier League";
+    const gameTitle = "APL";
+    const gameSubtitle = "Asia Premiere League";
 
     const element = h("div", {
       style: {

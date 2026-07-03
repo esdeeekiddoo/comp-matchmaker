@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <SelectContent>
                   {session.guild_ids.map((g) => (
                     <SelectItem key={g.id} value={g.id} className="text-xs">
-                      {g.name}
+                      {g.game_name ?? g.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

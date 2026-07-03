@@ -315,7 +315,8 @@ function QueuePage() {
   const fetchUsers = useCallback(async () => {
     setUsersLoading(true);
     try {
-      const res = await fetch("/api/queue");
+      const guildId = getGuildId();
+      const res = await fetch(`/api/queue${guildId ? `?guildId=${guildId}` : ""}`);
       const data = await res.json();
       if (data.players) setAllUsers(data.players);
     } catch {
@@ -323,7 +324,7 @@ function QueuePage() {
     } finally {
       setUsersLoading(false);
     }
-  }, []);
+  }, [session]);
 
   return (
     <AppShell>

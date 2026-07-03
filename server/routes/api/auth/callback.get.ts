@@ -51,17 +51,33 @@ export default defineEventHandler(async (event) => {
 
     const user = await userRes.json();
 
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
     // Fetch user's guilds
     const guildsRes = await fetch("https://discord.com/api/v10/users/@me/guilds", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    const memberGuilds: { id: string; name: string }[] = [];
+    const memberGuilds: { id: string; name: string; game_name?: string }[] = [];
     if (guildsRes.ok) {
       const guilds = await guildsRes.json();
       const knownGuildIds = ["1484564086074380311", "1522610593465368737"];
       for (const g of guilds) {
         if (knownGuildIds.includes(g.id)) {
-          memberGuilds.push({ id: g.id, name: g.name });
+          let gameName: string | undefined;
+          if (supabaseUrl && supabaseKey) {
+            try {
+              const gcRes = await fetch(
+                `${supabaseUrl}/rest/v1/guild_config?guild_id=eq.${g.id}&select=game_name`,
+                { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" } }
+              );
+              if (gcRes.ok) {
+                const rows = await gcRes.json();
+                if (Array.isArray(rows) && rows.length > 0) gameName = rows[0].game_name;
+              }
+            } catch {}
+          }
+          memberGuilds.push({ id: g.id, name: g.name, game_name: gameName });
         }
       }
     }
@@ -78,8 +94,6 @@ export default defineEventHandler(async (event) => {
     const sig = await signCookie(cookieVal, cookieSecret);
 
     // Save user to players table
-    const supabaseUrl = process.env.VITE_SUPABASE_URL;
-    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
     if (supabaseUrl && supabaseKey) {
       fetch(`${supabaseUrl}/rest/v1/players`, {
         method: "POST",
