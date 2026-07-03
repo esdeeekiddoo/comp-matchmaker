@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { avatarUrl, getActiveMatchForUser, getPlayersByIds } from "@/lib/supabase-queries";
 import { BanOverlay } from "@/components/ban-overlay";
+import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
 
 type QueuePlayer = {
   user_id: string;
@@ -50,30 +51,15 @@ export const Route = createFileRoute("/queue")({
   component: QueuePage,
 });
 
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
-}
-
-function parseSession(): { user_id: string; username: string; avatar_url: string } | null {
-  if (typeof window === "undefined") return null;
-  const cookie = getCookie("capl_session");
-  if (!cookie) return null;
-  const parts = cookie.split(".");
-  if (parts.length < 2) return null;
-  try {
-    const base64 = parts[0].replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(atob(base64));
-  } catch {
-    return null;
-  }
-}
-
 function QueuePage() {
   const [players, setPlayers] = useState<QueuePlayer[]>([]);
-  const [session, setSession] = useState<ReturnType<typeof parseSession>>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  function getGuildId(): string | undefined {
+    if (!session) return undefined;
+    return getActiveGuildId(session) || undefined;
+  }
   const [myParty, setMyParty] = useState<Party | null>(null);
   const [pendingInvites, setPendingInvites] = useState<Invite[]>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -90,7 +76,8 @@ function QueuePage() {
 
   const fetchQueue = useCallback(async () => {
     try {
-      const res = await fetch("/api/queue");
+      const guildId = getGuildId();
+      const res = await fetch(`/api/queue${guildId ? `?guildId=${guildId}` : ""}`);
       const data = await res.json();
       if (data.players) setPlayers(data.players);
     } catch {
@@ -98,7 +85,7 @@ function QueuePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [session]);
 
   const fetchParty = useCallback(async () => {
     if (!session) {
@@ -107,7 +94,8 @@ function QueuePage() {
       return;
     }
     try {
-      const res = await fetch("/api/party");
+      const guildId = getGuildId();
+      const res = await fetch(`/api/party${guildId ? `?guildId=${guildId}` : ""}`);
       const data = await res.json();
       if (data.ok) {
         setMyParty(data.party);
@@ -120,8 +108,9 @@ function QueuePage() {
 
   const fetchActiveMatch = useCallback(async () => {
     if (!session) return;
+    const guildId = getActiveGuildId(session) || undefined;
     try {
-      const match = await getActiveMatchForUser(session.user_id);
+      const match = await getActiveMatchForUser(session.user_id, guildId);
       if (match) {
         if (match.selected_map) {
           setActiveMatch(null);
@@ -191,7 +180,8 @@ function QueuePage() {
     if (!session) return;
     setLoading(true);
     try {
-      await fetch("/api/queue/join", {
+      const guildId = getGuildId();
+      await fetch(`/api/queue/join${guildId ? `?guildId=${guildId}` : ""}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(session),
@@ -206,7 +196,8 @@ function QueuePage() {
     if (!session) return;
     setLoading(true);
     try {
-      await fetch("/api/queue/leave", {
+      const guildId = getGuildId();
+      await fetch(`/api/queue/leave${guildId ? `?guildId=${guildId}` : ""}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: session.user_id }),
@@ -221,10 +212,11 @@ function QueuePage() {
     if (!session) return;
     setPartyLoading(true);
     try {
+      const guildId = getGuildId();
       const res = await fetch("/api/party", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ guildId }),
       });
       const data = await res.json();
       if (data.ok) {
@@ -243,10 +235,11 @@ function QueuePage() {
     if (!myParty || !session) return;
     setPartyLoading(true);
     try {
+      const guildId = getGuildId();
       const res = await fetch("/api/party/leave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ partyId: myParty.id }),
+        body: JSON.stringify({ partyId: myParty.id, guildId }),
       });
       const data = await res.json();
       if (data.ok) {
@@ -264,6 +257,7 @@ function QueuePage() {
 
   async function handleInvite(targetUserId: string, targetUsername: string) {
     if (!myParty || !session) return { ok: false, error: "Not logged in" };
+    const guildId = getGuildId();
     const res = await fetch("/api/party/invite", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -271,6 +265,7 @@ function QueuePage() {
         partyId: myParty.id,
         targetUserId,
         targetUsername,
+        guildId,
       }),
     });
     const data = await res.json();
@@ -285,10 +280,11 @@ function QueuePage() {
   async function handleAcceptInvite(invite: Invite) {
     setPartyLoading(true);
     try {
+      const guildId = getGuildId();
       const res = await fetch("/api/party/accept", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ partyId: invite.party_id }),
+        body: JSON.stringify({ partyId: invite.party_id, guildId }),
       });
       const data = await res.json();
       if (data.ok) {

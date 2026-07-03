@@ -54,17 +54,47 @@ function colHeader(label: string, width: number | string, align?: string) {
 }
 
 export default defineEventHandler(async (event) => {
+  const query = getQuery(event);
+  const guildId = query.guildId as string | undefined;
+
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseKey) { setResponseStatus(event, 500); return { error: "Supabase env missing" }; }
 
   try {
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/players?select=discord_id,username,avatar_url,elo,wins,losses&order=elo.desc&limit=10`,
-      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" } }
-    );
-    if (!res.ok) throw new Error(`Supabase ${res.status}`);
-    const players = await res.json();
+    let players: any[];
+    if (guildId) {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/guild_players?guild_id=eq.${guildId}&select=discord_id,elo,wins,losses&order=elo.desc&limit=10`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" } }
+      );
+      if (!res.ok) throw new Error(`Supabase ${res.status}`);
+      const guildRows = await res.json();
+      if (!Array.isArray(guildRows) || guildRows.length === 0) { setResponseStatus(event, 404); return { error: "No players found" }; }
+      const ids = guildRows.map((r: any) => r.discord_id);
+      const userRes = await fetch(
+        `${supabaseUrl}/rest/v1/players?select=discord_id,username,avatar_url&in=(${ids.map((id: string) => `"${id}"`).join(',')})`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" } }
+      );
+      const userRows = await userRes.json();
+      const userMap: Record<string, any> = {};
+      for (const u of Array.isArray(userRows) ? userRows : []) userMap[u.discord_id] = u;
+      players = guildRows.map((r: any) => ({
+        discord_id: r.discord_id,
+        username: userMap[r.discord_id]?.username ?? null,
+        avatar_url: userMap[r.discord_id]?.avatar_url ?? null,
+        elo: r.elo,
+        wins: r.wins,
+        losses: r.losses,
+      }));
+    } else {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/players?select=discord_id,username,avatar_url,elo,wins,losses&order=elo.desc&limit=10`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" } }
+      );
+      if (!res.ok) throw new Error(`Supabase ${res.status}`);
+      players = await res.json();
+    }
 
     if (!Array.isArray(players) || players.length === 0) {
       setResponseStatus(event, 404);
@@ -83,6 +113,8 @@ export default defineEventHandler(async (event) => {
     const columnHeaderHeight = 34;
     const footerHeight = 44;
     const totalHeight = headerHeight + columnHeaderHeight + rowCount * rowHeight + footerHeight;
+    const gameTitle = guildId ? "BloxArena" : "CAPL";
+    const gameSubtitle = guildId ? "Competitive Arena" : "Counter-Blox Asia Premier League";
 
     const element = h("div", {
       style: {
@@ -111,8 +143,8 @@ export default defineEventHandler(async (event) => {
         ...players.map((p: any, i: number) => playerRow(i, p)),
       ),
       h("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "10px 0", gap: 1, borderTop: `1px solid ${BORDER}` } },
-        h("span", { style: { color: MUTED, fontSize: 11, fontFamily: "Russo One" } }, "CAPL"),
-        h("span", { style: { color: MUTED, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2 } }, "Counter-Blox Asia Premier League"),
+        h("span", { style: { color: MUTED, fontSize: 11, fontFamily: "Russo One" } }, gameTitle),
+        h("span", { style: { color: MUTED, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2 } }, gameSubtitle),
       ),
     );
 

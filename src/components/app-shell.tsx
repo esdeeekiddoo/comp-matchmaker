@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useState, useEffect } from "react";
-import { Bell, Search, MessageCircle, LogOut } from "lucide-react";
+import { Bell, Search, MessageCircle, LogOut, Gamepad2 } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { avatarUrl } from "@/lib/supabase-queries";
@@ -8,34 +8,29 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BackgroundEffects } from "@/components/background-effects";
-
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
-}
-
-function parseSession(): { user_id: string; username: string; avatar_url: string } | null {
-  if (typeof window === "undefined") return null;
-  const cookie = getCookie("capl_session");
-  if (!cookie) return null;
-  const parts = cookie.split(".");
-  if (parts.length < 2) return null;
-  try {
-    const base64 = parts[0].replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = atob(base64);
-    return JSON.parse(decoded);
-  } catch {
-    return null;
-  }
-}
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { parseSession, getActiveGuildId, setActiveGuildId, type Session } from "@/lib/session";
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<ReturnType<typeof parseSession>>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [activeGuild, setActiveGuild] = useState<string>("");
 
   useEffect(() => {
-    setSession(parseSession());
+    const s = parseSession();
+    setSession(s);
+    setActiveGuild(getActiveGuildId(s) || "");
   }, []);
+
+  function handleGuildChange(guildId: string) {
+    setActiveGuild(guildId);
+    setActiveGuildId(guildId);
+  }
 
   function handleLogout() {
     document.cookie = "capl_session=; Path=/; Max-Age=0";
@@ -49,6 +44,21 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-3 backdrop-blur-md sm:px-5">
             <SidebarTrigger />
+            {session && session.guild_ids?.length > 1 && (
+              <Select value={activeGuild} onValueChange={handleGuildChange}>
+                <SelectTrigger className="h-8 w-[160px] border-border bg-muted text-xs">
+                  <Gamepad2 className="mr-1 h-3.5 w-3.5 shrink-0 text-primary" />
+                  <SelectValue placeholder="Select game" />
+                </SelectTrigger>
+                <SelectContent>
+                  {session.guild_ids.map((g) => (
+                    <SelectItem key={g.id} value={g.id} className="text-xs">
+                      {g.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <div className="relative hidden md:block md:w-72">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input

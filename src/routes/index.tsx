@@ -19,11 +19,13 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { RankBadge } from "@/components/rank-badge";
 import { getPlayers, getRecentMatches, avatarUrl } from "@/lib/supabase-queries";
 import { getMapImage } from "@/lib/maps";
+import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
 import hero from "@/assets/hero.jpg";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const [all, recent] = await Promise.all([getPlayers(), getRecentMatches(5)]);
+    const guildId = typeof window !== "undefined" ? getActiveGuildId(parseSession()) : undefined;
+    const [all, recent] = await Promise.all([getPlayers(guildId), getRecentMatches(5, guildId)]);
     const top = all.slice(0, 6);
     return { top, recent, total: all.length };
   },
@@ -38,30 +40,9 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
-}
-
-function parseSession(): { user_id: string; username: string; avatar_url: string } | null {
-  if (typeof window === "undefined") return null;
-  const cookie = getCookie("capl_session");
-  if (!cookie) return null;
-  const parts = cookie.split(".");
-  if (parts.length < 2) return null;
-  try {
-    const base64 = parts[0].replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = atob(base64);
-    return JSON.parse(decoded);
-  } catch {
-    return null;
-  }
-}
-
 function Home() {
   const { top, recent, total } = Route.useLoaderData();
-  const [session, setSession] = useState<ReturnType<typeof parseSession>>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     setSession(parseSession());

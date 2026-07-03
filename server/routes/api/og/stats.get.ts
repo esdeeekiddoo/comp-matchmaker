@@ -58,7 +58,7 @@ function statTile(label: string, value: string, color: string) {
   );
 }
 
-function buildCard(player: any, history: any[], rank: { name: string; color: string }) {
+function buildCard(player: any, history: any[], rank: { name: string; color: string }, guildId?: string) {
   const total = player.wins + player.losses;
   const winPct = total > 0 ? Math.round((player.wins / total) * 100) : 0;
   const name = player.username ?? player.discord_id;
@@ -100,8 +100,8 @@ function buildCard(player: any, history: any[], rank: { name: string; color: str
       statTile("Trend", trend, trend.startsWith("+") ? GREEN : trend.startsWith("-") ? RED : MUTED),
     ),
     h("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", marginTop: "auto", padding: "10px 0", gap: 1 } },
-      h("span", { style: { color: MUTED, fontSize: 11, fontFamily: "Russo One" } }, "CAPL"),
-      h("span", { style: { color: MUTED, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2 } }, "Counter-Blox Asia Premier League"),
+      h("span", { style: { color: MUTED, fontSize: 11, fontFamily: "Russo One" } }, guildId ? "BloxArena" : "CAPL"),
+      h("span", { style: { color: MUTED, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2 } }, guildId ? "Competitive Arena" : "Counter-Blox Asia Premier League"),
     ),
   );
 }
@@ -109,6 +109,7 @@ function buildCard(player: any, history: any[], rank: { name: string; color: str
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const userId = query.userId as string | undefined;
+  const guildId = query.guildId as string | undefined;
   if (!userId) { setResponseStatus(event, 400); return { error: "Missing userId" }; }
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -116,8 +117,16 @@ export default defineEventHandler(async (event) => {
   if (!supabaseUrl || !supabaseKey) { setResponseStatus(event, 500); return { error: "Supabase env missing" }; }
 
   try {
+    const playerTable = guildId ? "guild_players" : "players";
+    const playerFilter = guildId
+      ? `discord_id=eq.${userId}&guild_id=eq.${guildId}`
+      : `discord_id=eq.${userId}`;
+    const playerSelect = guildId
+      ? "discord_id,elo,wins,losses"
+      : "discord_id,username,avatar_url,elo,wins,losses";
+
     const [players, history] = await Promise.all([
-      fetch(`${supabaseUrl}/rest/v1/players?discord_id=eq.${userId}&select=discord_id,username,avatar_url,elo,wins,losses`, {
+      fetch(`${supabaseUrl}/rest/v1/${playerTable}?${playerFilter}&select=${playerSelect}`, {
         headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" },
       }).then(r => { if (!r.ok) throw new Error(`Supabase ${r.status}`); return r.json(); }),
       fetch(`${supabaseUrl}/rest/v1/elo_history?discord_id=eq.${userId}&select=elo&order=created_at.asc&limit=10`, {
@@ -125,11 +134,20 @@ export default defineEventHandler(async (event) => {
       }).then(r => { if (!r.ok) throw new Error(`Supabase ${r.status}`); return r.json(); }),
     ]);
 
-    const player = Array.isArray(players) && players.length > 0 ? players[0] : null;
+    let player = Array.isArray(players) && players.length > 0 ? players[0] : null;
     if (!player) { setResponseStatus(event, 404); return { error: "Player not found" }; }
 
+    // If guild-scoped, fetch username/avatar from players table
+    if (guildId) {
+      const userRes = await fetch(`${supabaseUrl}/rest/v1/players?discord_id=eq.${userId}&select=discord_id,username,avatar_url`, {
+        headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" },
+      }).then(r => r.json());
+      const userRow = Array.isArray(userRes) && userRes.length > 0 ? userRes[0] : null;
+      player = { ...player, username: userRow?.username ?? null, avatar_url: userRow?.avatar_url ?? null };
+    }
+
     const rank = getRank(player.elo);
-    const element = buildCard(player, Array.isArray(history) ? history : [], rank);
+    const element = buildCard(player, Array.isArray(history) ? history : [], rank, guildId);
 
     const [inter400, inter700, russoOne] = await Promise.all([
       fetch("https://cdn.jsdelivr.net/npm/@fontsource/inter@5/files/inter-latin-400-normal.woff").then(r => r.arrayBuffer()),

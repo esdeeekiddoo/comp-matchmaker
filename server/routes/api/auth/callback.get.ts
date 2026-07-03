@@ -50,10 +50,27 @@ export default defineEventHandler(async (event) => {
     }
 
     const user = await userRes.json();
+
+    // Fetch user's guilds
+    const guildsRes = await fetch("https://discord.com/api/v10/users/@me/guilds", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const memberGuilds: { id: string; name: string }[] = [];
+    if (guildsRes.ok) {
+      const guilds = await guildsRes.json();
+      const knownGuildIds = ["1484564086074380311", "1522610593465368737"];
+      for (const g of guilds) {
+        if (knownGuildIds.includes(g.id)) {
+          memberGuilds.push({ id: g.id, name: g.name });
+        }
+      }
+    }
+
     const session = {
       user_id: user.id,
       username: user.global_name || user.username,
       avatar_url: user.avatar || "",
+      guild_ids: memberGuilds,
     };
 
     const cookieVal = Buffer.from(JSON.stringify(session)).toString("base64url");

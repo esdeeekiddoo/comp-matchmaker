@@ -12,34 +12,14 @@ import {
   Swords, Shield, Flame, BarChart3, ExternalLink 
 } from "lucide-react";
 import { getPlayerByDiscordId, getPlayerMatches, avatarUrl } from "@/lib/supabase-queries";
+import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
 });
 
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
-}
-
-function parseSession(): { user_id: string; username: string; avatar_url: string } | null {
-  if (typeof window === "undefined") return null;
-  const cookie = getCookie("capl_session");
-  if (!cookie) return null;
-  const parts = cookie.split(".");
-  if (parts.length < 2) return null;
-  try {
-    const base64 = parts[0].replace(/-/g, '+').replace(/_/g, '/');
-    const decoded = atob(base64);
-    return JSON.parse(decoded);
-  } catch {
-    return null;
-  }
-}
-
 function ProfilePage() {
-  const [session, setSession] = useState<ReturnType<typeof parseSession>>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [player, setPlayer] = useState<any>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,17 +29,18 @@ function ProfilePage() {
     setSession(s);
     
     if (s) {
-      loadPlayerData(s.user_id);
+      loadPlayerData(s.user_id, s);
     } else {
       setLoading(false);
     }
   }, []);
 
-  async function loadPlayerData(userId: string) {
+  async function loadPlayerData(userId: string, s: Session) {
     try {
+      const guildId = getActiveGuildId(s) || undefined;
       const [playerData, matchData] = await Promise.all([
         getPlayerByDiscordId(userId),
-        getPlayerMatches(userId, 10),
+        getPlayerMatches(userId, 10, guildId),
       ]);
       setPlayer(playerData);
       setMatches(matchData || []);

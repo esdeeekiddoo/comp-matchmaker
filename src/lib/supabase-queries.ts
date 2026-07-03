@@ -37,7 +37,32 @@ export type BanMatchRow = MatchRow & {
   ban_deadline: string;
 };
 
-export async function getPlayers(): Promise<PlayerRow[]> {
+export async function getPlayers(guildId?: string): Promise<PlayerRow[]> {
+  if (guildId) {
+    const { data } = await supabase
+      .from("guild_players")
+      .select("discord_id, elo, wins, losses")
+      .eq("guild_id", guildId)
+      .order("elo", { ascending: false })
+      .limit(50);
+    const rows = (data ?? []) as any[];
+    if (rows.length === 0) return [];
+    const ids = rows.map((r) => r.discord_id);
+    const { data: playerData } = await supabase
+      .from("players")
+      .select("discord_id, username, avatar_url")
+      .in("discord_id", ids);
+    const playerMap: Record<string, any> = {};
+    for (const p of playerData ?? []) playerMap[p.discord_id] = p;
+    return rows.map((r) => ({
+      discord_id: r.discord_id,
+      username: playerMap[r.discord_id]?.username ?? null,
+      avatar_url: playerMap[r.discord_id]?.avatar_url ?? null,
+      elo: r.elo,
+      wins: r.wins,
+      losses: r.losses,
+    }));
+  }
   const { data } = await supabase
     .from("players")
     .select("discord_id, username, avatar_url, elo, wins, losses")
@@ -87,13 +112,15 @@ export type PeriodPlayerRow = PlayerRow & {
   period_losses: number;
 };
 
-export async function getPeriodLeaderboard(days: number): Promise<PeriodPlayerRow[]> {
+export async function getPeriodLeaderboard(days: number, guildId?: string): Promise<PeriodPlayerRow[]> {
   const since = new Date(Date.now() - days * 86400000).toISOString();
-  const { data } = await supabase
+  let query = supabase
     .from("matches")
-    .select("elo_changes, winner, atk_team, def_team")
+    .select("elo_changes, winner, atk_team, def_team, guild_id")
     .eq("status", "ended")
     .gte("created_at", since);
+  if (guildId) query = query.eq("guild_id", guildId);
+  const { data } = await query;
 
   if (!data || data.length === 0) return [];
 
@@ -138,13 +165,15 @@ export async function getPeriodLeaderboard(days: number): Promise<PeriodPlayerRo
     .sort((a, b) => b.elo_gained - a.elo_gained);
 }
 
-export async function getRecentMatches(limit = 5): Promise<MatchRow[]> {
-  const { data } = await supabase
+export async function getRecentMatches(limit = 5, guildId?: string): Promise<MatchRow[]> {
+  let query = supabase
     .from("matches")
-    .select("id, region, match_number, atk_team, def_team, selected_map, winner, elo_changes, created_at")
+    .select("id, guild_id, region, match_number, atk_team, def_team, selected_map, winner, elo_changes, created_at")
     .eq("status", "ended")
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (guildId) query = query.eq("guild_id", guildId);
+  const { data } = await query;
   return (data ?? []) as MatchRow[];
 }
 
@@ -167,25 +196,29 @@ export async function getPlayerByDiscordId(discordId: string): Promise<PlayerRow
   return data as PlayerRow | null;
 }
 
-export async function getPlayerMatches(discordId: string, limit = 10): Promise<MatchRow[]> {
-  const { data } = await supabase
+export async function getPlayerMatches(discordId: string, limit = 10, guildId?: string): Promise<MatchRow[]> {
+  let query = supabase
     .from("matches")
-    .select("id, region, match_number, atk_team, def_team, selected_map, winner, elo_changes, created_at")
+    .select("id, guild_id, region, match_number, atk_team, def_team, selected_map, winner, elo_changes, created_at")
     .eq("status", "ended")
     .or(`atk_team.cs.{"${discordId}"},def_team.cs.{"${discordId}"}`)
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (guildId) query = query.eq("guild_id", guildId);
+  const { data } = await query;
   return (data ?? []) as MatchRow[];
 }
 
-export async function getActiveMatchForUser(userId: string): Promise<BanMatchRow | null> {
-  const { data } = await supabase
+export async function getActiveMatchForUser(userId: string, guildId?: string): Promise<BanMatchRow | null> {
+  let query = supabase
     .from("matches")
     .select("id, match_number, region, atk_team, def_team, selected_map, status, bans, banners, ban_deadline, created_at")
     .eq("status", "active")
     .or(`atk_team.cs.{"${userId}"},def_team.cs.{"${userId}"}`)
     .order("created_at", { ascending: false })
     .limit(1);
+  if (guildId) query = query.eq("guild_id", guildId);
+  const { data } = await query;
   if (!data || data.length === 0) return null;
   return data[0] as BanMatchRow | null;
 }

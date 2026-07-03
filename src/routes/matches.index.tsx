@@ -4,14 +4,18 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/lib/supabase";
 import { getMapImage } from "@/lib/maps";
+import { parseSession, getActiveGuildId } from "@/lib/session";
 
 export const Route = createFileRoute("/matches/")({
   loader: async () => {
-    const { data } = await supabase
+    const guildId = typeof window !== "undefined" ? getActiveGuildId(parseSession()) : undefined;
+    let query = supabase
       .from("matches")
-      .select("id, region, match_number, selected_map, status, winner, created_at")
+      .select("id, region, match_number, selected_map, status, winner, created_at, guild_id")
       .order("created_at", { ascending: false })
       .limit(20);
+    if (guildId) query = query.eq("guild_id", guildId);
+    const { data } = await query;
     return { matches: data ?? [] };
   },
   component: MatchesList,

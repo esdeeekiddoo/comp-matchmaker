@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -45,6 +45,9 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
   const [banning, setBanning] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
 
+  const bansRef = useRef(bans);
+  bansRef.current = bans;
+
   const userIsBanner = match.banners?.atk === session.user_id || match.banners?.def === session.user_id;
   const isAtkBanner = match.banners?.atk === session.user_id;
   const myTeam = isAtkBanner ? "atk" : "def";
@@ -75,7 +78,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
     console.log("[ban-overlay] timeLeft=0, starting auto-pick polling");
     const interval = setInterval(async () => {
       try {
-        const remaining = MAP_POOL.filter((m) => !bans.includes(m));
+        const remaining = MAP_POOL.filter((m) => !bansRef.current.includes(m));
         if (remaining.length === 0) return;
         const res = await fetch("/api/match/ban", {
           method: "POST",

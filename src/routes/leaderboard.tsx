@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { getPlayers, getPeriodLeaderboard, avatarUrl, type PlayerRow, type PeriodPlayerRow } from "@/lib/supabase-queries";
+import { parseSession, getActiveGuildId } from "@/lib/session";
 
 type Tab = "all" | "week" | "month";
 
@@ -17,10 +18,11 @@ const tabs: { key: Tab; label: string }[] = [
 
 export const Route = createFileRoute("/leaderboard")({
   loader: async () => {
+    const guildId = typeof window !== "undefined" ? getActiveGuildId(parseSession()) : undefined;
     const [all, weekly, monthly] = await Promise.all([
-      getPlayers(),
-      getPeriodLeaderboard(7),
-      getPeriodLeaderboard(30),
+      getPlayers(guildId),
+      getPeriodLeaderboard(7, guildId),
+      getPeriodLeaderboard(30, guildId),
     ]);
     return { all, weekly, monthly };
   },
