@@ -103,11 +103,19 @@ export default defineEventHandler(async (event) => {
       return { ok: false, error: "Invalid map name" };
     }
 
+    const atkTurn = currentBans.length % 2 === 0;
+    if (atkTurn && banners.atk !== userId) {
+      return { ok: false, error: "It's ATK's turn to ban" };
+    }
+    if (!atkTurn && banners.def !== userId) {
+      return { ok: false, error: "It's DEF's turn to ban" };
+    }
+
     const newBans = [...currentBans, mapName];
     const remaining = MAPS.filter((m) => !newBans.includes(m));
 
     let selectedMap: string | null = null;
-    if (newBans.length >= 2 && remaining.length > 0) {
+    if (newBans.length >= 4 && remaining.length > 0) {
       selectedMap = remaining[Math.floor(Math.random() * remaining.length)];
     }
 

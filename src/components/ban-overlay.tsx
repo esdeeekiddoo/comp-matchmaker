@@ -52,7 +52,9 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
   const myBanCount = myTeam === "atk"
     ? bans.filter((_, i) => i % 2 === 0).length
     : bans.filter((_, i) => i % 2 === 1).length;
-  const canBan = userIsBanner && myBanCount === 0 && !selectedMap;
+  const atkTurn = bans.length % 2 === 0;
+  const myTurn = atkTurn ? isAtkBanner : !isAtkBanner;
+  const canBan = userIsBanner && myBanCount < 2 && myTurn && !selectedMap;
 
   useEffect(() => {
     const deadline = new Date(match.ban_deadline).getTime();
@@ -81,7 +83,10 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
           body: JSON.stringify({ userId: session.user_id, matchId: match.id, mapName: remaining[0] }),
         });
         const data = await res.json();
-        console.log("[ban-overlay] auto-pick response:", data);
+        console.log("[ban-overlay] auto-pick response:", JSON.stringify(data));
+        if (data.discord && !data.discord.notified) {
+          console.error("[ban-overlay] DISCORD EMBED FAILED:", data.discord.error);
+        }
         if (data.ok) {
           setBans(data.bans);
           if (data.selected_map) {
@@ -170,7 +175,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
                 className="text-muted-foreground/20" />
               <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="6"
                 strokeDasharray={`${2 * Math.PI * 42}`}
-                strokeDashoffset={`${2 * Math.PI * 42 * (1 - timeLeft / 20)}`}
+                strokeDashoffset={`${2 * Math.PI * 42 * (1 - timeLeft / 60)}`}
                 className="text-primary transition-all duration-500"
                 strokeLinecap="round" />
             </svg>
@@ -269,10 +274,12 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
                   <Map className="h-4 w-4 text-primary" />
                   <span className="text-sm font-semibold">Ban a Map</span>
                 </div>
-                {userIsBanner ? (
+                {userIsBanner && canBan ? (
                   <span className="text-xs text-muted-foreground">Click a map to ban</span>
                 ) : (
-                  <span className="text-xs text-muted-foreground">Waiting for team bans...</span>
+                  <span className="text-xs text-muted-foreground">
+                    {userIsBanner ? "Waiting for other captain..." : `Waiting for ${atkTurn ? "ATK" : "DEF"} captain...`}
+                  </span>
                 )}
               </div>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -313,7 +320,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
 
             {/* Info */}
             <p className="text-center text-xs text-muted-foreground">
-              Each team bans one map. The remaining map is played.
+              Each team bans two maps. The remaining map is played.
             </p>
           </>
         )}
