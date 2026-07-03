@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import favicon from "../assets/CAPL.png";
+import favicon from "../assets/APL.jpg";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
 
@@ -100,7 +100,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", type: "image/webp", href: favicon },
+      { rel: "icon", type: "image/jpeg", href: favicon },
+      { rel: "apple-touch-icon", href: favicon },
     ],
   }),
   shellComponent: RootShell,
