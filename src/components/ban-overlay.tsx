@@ -80,10 +80,11 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
       try {
         const remaining = MAP_POOL.filter((m) => !bansRef.current.includes(m));
         if (remaining.length === 0) return;
+        const bannerId = bansRef.current.length % 2 === 0 ? match.banners.atk : match.banners.def;
         const res = await fetch("/api/match/ban", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: session.user_id, matchId: match.id, mapName: remaining[0] }),
+          body: JSON.stringify({ userId: bannerId, matchId: match.id, mapName: remaining[0] }),
         });
         const data = await res.json();
         console.log("[ban-overlay] auto-pick response:", JSON.stringify(data));

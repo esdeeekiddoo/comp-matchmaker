@@ -70,7 +70,7 @@ export default defineEventHandler(async (event) => {
 
     const currentBans: string[] = match.bans || [];
 
-    const expired = match.ban_deadline && new Date(match.ban_deadline).getTime() < Date.now();
+    const expired = match.ban_deadline && new Date(match.ban_deadline).getTime() - 2000 < Date.now();
     if (expired) {
       console.log(`[ban] deadline expired for match ${matchId}, auto-picking`);
       const remaining = MAPS.filter((m) => !currentBans.includes(m));
