@@ -69,30 +69,16 @@ export default defineEventHandler(async (event) => {
     }
 
     const currentBans: string[] = match.bans || [];
-
-    const expired = match.ban_deadline && new Date(match.ban_deadline).getTime() - 5000 < Date.now();
-    if (expired) {
-      console.log(`[ban] deadline expired for match ${matchId}, auto-picking`);
-      const remaining = MAPS.filter((m) => !currentBans.includes(m));
-      const picked = remaining[Math.floor(Math.random() * remaining.length)] || MAPS[0];
-      await fetch(`${url}/rest/v1/matches?id=eq.${matchId}`, {
-        method: "PATCH",
-        headers: {
-          apikey: key,
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ selected_map: picked, bans: null, banners: null, ban_deadline: null }),
-      });
-      console.log(`[ban] auto-picked map: ${picked}`);
-      const notifyResult = await notifyDiscord(match, picked);
-      return { ok: true, bans: currentBans, selected_map: picked, discord: notifyResult };
-    }
-
     const banners = match.banners || {};
 
-    const closeToDeadline = match.ban_deadline && new Date(match.ban_deadline).getTime() - 5000 < Date.now();
-    if (!closeToDeadline) {
+    if (currentBans.includes(mapName)) {
+      return { ok: false, error: "Map already banned" };
+    }
+    if (!MAPS.includes(mapName) && mapName !== "__auto__") {
+      return { ok: false, error: "Invalid map name" };
+    }
+
+    if (mapName !== "__auto__") {
       if (banners.atk !== userId && banners.def !== userId) {
         console.log(`[ban] user ${userId} is not a banner (atk=${banners.atk}, def=${banners.def})`);
         setResponseStatus(event, 403);
@@ -108,18 +94,13 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    if (currentBans.includes(mapName)) {
-      return { ok: false, error: "Map already banned" };
-    }
-    if (!MAPS.includes(mapName)) {
-      return { ok: false, error: "Invalid map name" };
-    }
-
-    const newBans = [...currentBans, mapName];
+    const newBans = mapName === "__auto__" ? currentBans : [...currentBans, mapName];
     const remaining = MAPS.filter((m) => !newBans.includes(m));
 
     let selectedMap: string | null = null;
-    if (newBans.length >= 4 && remaining.length > 0) {
+    if (mapName === "__auto__" && remaining.length > 0) {
+      selectedMap = remaining[Math.floor(Math.random() * remaining.length)];
+    } else if (newBans.length >= 4 && remaining.length > 0) {
       selectedMap = remaining[Math.floor(Math.random() * remaining.length)];
     }
 
