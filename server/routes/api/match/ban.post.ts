@@ -70,7 +70,7 @@ export default defineEventHandler(async (event) => {
 
     const currentBans: string[] = match.bans || [];
 
-    const expired = match.ban_deadline && new Date(match.ban_deadline).getTime() - 2000 < Date.now();
+    const expired = match.ban_deadline && new Date(match.ban_deadline).getTime() - 5000 < Date.now();
     if (expired) {
       console.log(`[ban] deadline expired for match ${matchId}, auto-picking`);
       const remaining = MAPS.filter((m) => !currentBans.includes(m));
@@ -90,10 +90,22 @@ export default defineEventHandler(async (event) => {
     }
 
     const banners = match.banners || {};
-    if (banners.atk !== userId && banners.def !== userId) {
-      console.log(`[ban] user ${userId} is not a banner (atk=${banners.atk}, def=${banners.def})`);
-      setResponseStatus(event, 403);
-      return { ok: false, error: "You are not a designated banner" };
+
+    const closeToDeadline = match.ban_deadline && new Date(match.ban_deadline).getTime() - 5000 < Date.now();
+    if (!closeToDeadline) {
+      if (banners.atk !== userId && banners.def !== userId) {
+        console.log(`[ban] user ${userId} is not a banner (atk=${banners.atk}, def=${banners.def})`);
+        setResponseStatus(event, 403);
+        return { ok: false, error: "You are not a designated banner" };
+      }
+
+      const atkTurn = currentBans.length % 2 === 0;
+      if (atkTurn && banners.atk !== userId) {
+        return { ok: false, error: "It's ATK's turn to ban" };
+      }
+      if (!atkTurn && banners.def !== userId) {
+        return { ok: false, error: "It's DEF's turn to ban" };
+      }
     }
 
     if (currentBans.includes(mapName)) {
@@ -101,14 +113,6 @@ export default defineEventHandler(async (event) => {
     }
     if (!MAPS.includes(mapName)) {
       return { ok: false, error: "Invalid map name" };
-    }
-
-    const atkTurn = currentBans.length % 2 === 0;
-    if (atkTurn && banners.atk !== userId) {
-      return { ok: false, error: "It's ATK's turn to ban" };
-    }
-    if (!atkTurn && banners.def !== userId) {
-      return { ok: false, error: "It's DEF's turn to ban" };
     }
 
     const newBans = [...currentBans, mapName];
