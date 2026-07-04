@@ -73,7 +73,7 @@ export default defineEventHandler(async (event) => {
       if (!Array.isArray(guildRows) || guildRows.length === 0) { setResponseStatus(event, 404); return { error: "No players found" }; }
       const ids = guildRows.map((r: any) => r.discord_id);
       const userRes = await fetch(
-        `${supabaseUrl}/rest/v1/players?select=discord_id,username,avatar_url&in=(${ids.map((id: string) => `"${id}"`).join(',')})`,
+        `${supabaseUrl}/rest/v1/players?select=discord_id,username,avatar_url&discord_id=in.(${ids.join(',')})`,
         { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" } }
       );
       const userRows = await userRes.json();
