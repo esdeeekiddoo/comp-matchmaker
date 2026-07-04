@@ -42,11 +42,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <BackgroundEffects />
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-3 backdrop-blur-md sm:px-5">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background/80 px-3 backdrop-blur-md sm:px-5">
             <SidebarTrigger />
             {session && session.guild_ids?.length > 1 && (
               <Select value={activeGuild} onValueChange={handleGuildChange}>
-                <SelectTrigger className="h-8 w-[160px] border-border bg-muted text-xs">
+                <SelectTrigger className="h-8 w-[140px] shrink-0 border-border bg-muted text-xs sm:w-[160px]">
                   <Gamepad2 className="mr-1 h-3.5 w-3.5 shrink-0 text-primary" />
                   <SelectValue placeholder="Select game" />
                 </SelectTrigger>
@@ -59,14 +59,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </SelectContent>
               </Select>
             )}
-            <div className="relative hidden md:block md:w-72">
+            <div className="relative hidden min-w-0 flex-1 md:block md:max-w-xs lg:max-w-sm">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search players, matches…"
-                className="h-9 border-border bg-muted pl-9 text-sm"
+                className="h-9 w-full border-border bg-muted pl-9 text-sm"
               />
             </div>
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
               {!session ? (
                 <Button
                   asChild
@@ -75,7 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 >
                   <a href="/api/auth/discord">
                     <MessageCircle className="h-4 w-4" />
-                    Login with Discord
+                    Login
                   </a>
                 </Button>
               ) : (
@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="text-muted-foreground hover:text-foreground"
+                    className="hidden h-8 w-8 text-muted-foreground hover:text-foreground sm:inline-flex"
                   >
                     <Bell className="h-4 w-4" />
                   </Button>
@@ -94,13 +94,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                     </AvatarFallback>
                   </Avatar>
                   <Button
-                    size="sm"
+                    size="icon"
                     variant="ghost"
                     onClick={handleLogout}
-                    className="hidden gap-2 text-muted-foreground hover:text-foreground sm:inline-flex"
+                    className="hidden h-8 w-8 text-muted-foreground hover:text-foreground sm:inline-flex"
                   >
                     <LogOut className="h-4 w-4" />
-                    Logout
                   </Button>
                 </>
               )}

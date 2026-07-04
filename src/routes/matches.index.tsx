@@ -32,8 +32,8 @@ function MatchesList() {
           <div className="section-title flex items-center gap-2">
             <Swords className="h-3.5 w-3.5" /> Match History
           </div>
-          <h1 className="text-display mt-1 text-3xl font-bold">Recent Matches</h1>
-          <p className="text-sm text-muted-foreground">{matches.length} matches · all regions</p>
+          <h1 className="text-display mt-1 text-2xl font-bold sm:text-3xl">Recent Matches</h1>
+          <p className="text-xs text-muted-foreground sm:text-sm">{matches.length} matches · all regions</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
