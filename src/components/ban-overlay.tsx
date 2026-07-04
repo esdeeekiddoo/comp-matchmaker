@@ -43,7 +43,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
   const [bans, setBans] = useState<string[]>(match.bans || []);
   const [selectedMap, setSelectedMap] = useState<string | null>(match.selected_map);
   const [banning, setBanning] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(-1);
 
   const userIsBanner = match.banners?.atk === session.user_id || match.banners?.def === session.user_id;
   const isAtkBanner = match.banners?.atk === session.user_id;
@@ -71,7 +71,11 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
   }, [match.selected_map]);
 
   useEffect(() => {
-    if (timeLeft !== 0 || selectedMap) return;
+    if (match.bans) setBans(match.bans);
+  }, [match.bans]);
+
+  useEffect(() => {
+    if (timeLeft <= 0 || selectedMap) return;
     console.log("[ban-overlay] timeLeft=0, starting auto-pick polling");
     const interval = setInterval(async () => {
       try {
@@ -98,7 +102,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
       }
     }, 2000);
     return () => clearInterval(interval);
-  }, [timeLeft]);
+  }, [timeLeft, selectedMap]);
 
   const handleBan = useCallback(async (mapName: string) => {
     if (!canBan || banning) return;
