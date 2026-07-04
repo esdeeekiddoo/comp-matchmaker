@@ -160,4 +160,12 @@
   box-shadow: 0 0 15px rgba(255, 85, 0, 0.06);
 }
 
+.card-faceit {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.card-faceit:hover {
+  border-color: rgba(255, 85, 0, 0.25) !important;
+  box-shadow: 0 0 24px rgba(255, 85, 0, 0.12), 0 0 8px rgba(255, 85, 0, 0.06);
+}
+
 
