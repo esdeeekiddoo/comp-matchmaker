@@ -78,6 +78,16 @@ export default defineEventHandler(async (event) => {
     const partyData = await createRes.json();
     const party = Array.isArray(partyData) ? partyData[0] : partyData;
 
+    const now = new Date().toISOString();
+    const banRes = await fetch(
+      `${url}/rest/v1/queue_bans?guild_id=eq.${guildId}&discord_id=eq.${session.user_id}&expires_at=gt.${now}&select=id`,
+      { headers: { ...headers, Accept: "application/json" } },
+    );
+    const bans = await banRes.json();
+    if (Array.isArray(bans) && bans.length > 0) {
+      return { ok: false, error: "You are banned from the queue." };
+    }
+
     await fetch(`${url}/rest/v1/web_queue`, {
       method: "POST",
       headers: { ...headers, Prefer: "resolution=merge-duplicates" },
