@@ -131,8 +131,8 @@ function LiveStats({ total }: { total: number }) {
   ];
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      {stats.map((s) => (
-        <Card key={s.label} className="border-border bg-card p-4">
+      {stats.map((s, i) => (
+        <Card key={s.label} className={`border-border/60 bg-card p-4 ${i % 2 === 1 ? "bg-muted/10" : ""}`}>
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[10px] font-semibold uppercase tracking-wider">{s.label}</span>
             <s.icon className={`h-4 w-4 ${s.color}`} />
@@ -147,7 +147,7 @@ function LiveStats({ total }: { total: number }) {
 
 function RecentMatches({ matches }: { matches: Awaited<ReturnType<typeof getRecentMatches>> }) {
   return (
-    <Card className="border-border bg-card p-5">
+    <Card className="border-border/60 bg-card p-5">
       <div className="mb-4 flex items-center justify-between">
         <div className="section-title">Recent Matches</div>
         <Link to="/matches" className="text-xs text-muted-foreground hover:text-primary">
@@ -195,7 +195,7 @@ function RecentMatches({ matches }: { matches: Awaited<ReturnType<typeof getRece
 
 function TopPlayersCard({ top }: { top: Awaited<ReturnType<typeof getPlayers>> }) {
   return (
-    <Card className="border-border bg-card p-5">
+    <Card className="border-border/60 bg-card p-5">
       <div className="mb-4 flex items-center justify-between">
         <div className="section-title">Top Players</div>
         <Link to="/leaderboard" className="text-xs text-muted-foreground hover:text-primary">
@@ -238,7 +238,7 @@ function TopPlayersCard({ top }: { top: Awaited<ReturnType<typeof getPlayers>> }
 
 function DiscordCard() {
   return (
-    <Card className="border-border bg-card overflow-hidden">
+    <Card className="border-border/60 bg-card overflow-hidden">
       <div className="bg-[#5865F2] p-4 text-center">
         <MessageCircle className="mx-auto h-8 w-8 text-white" />
       </div>

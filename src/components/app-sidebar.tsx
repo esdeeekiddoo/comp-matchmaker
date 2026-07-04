@@ -37,7 +37,7 @@ export function AppSidebar() {
   }, []);
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" className="border-r border-border/40">
       <SidebarHeader className="px-3 py-4">
         <Link to="/" className="flex items-center gap-2">
           <div className="grid h-8 w-8 place-items-center">
@@ -45,7 +45,7 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
             <span className="text-display text-sm font-extrabold uppercase tracking-wider">
-              APL | Asia Premiere League
+              APL
             </span>
             <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Asia Premiere League

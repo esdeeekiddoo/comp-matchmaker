@@ -151,11 +151,13 @@
   color: var(--color-primary);
 }
 
-@keyframes flicker {
-  0%, 100% { opacity: 0.15; }
-  50% { opacity: 0.6; }
+@utility faceit-glow {
+  box-shadow: 0 0 20px rgba(255, 85, 0, 0.08);
 }
 
-.crackle-line {
-  animation: flicker 2.5s ease-in-out infinite;
+@utility faceit-border-glow {
+  border-color: rgba(255, 85, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 85, 0, 0.06);
 }
+
+

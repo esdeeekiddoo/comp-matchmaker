@@ -37,7 +37,7 @@ function MatchesList() {
       <div className="grid gap-3 md:grid-cols-2">
         {matches.map((m) => (
           <Link key={m.id} to="/matches/$id" params={{ id: m.id }}>
-            <Card className="group flex h-24 overflow-hidden border-border bg-card transition hover:border-primary/50">
+            <Card className="group flex h-24 overflow-hidden border-border/60 bg-card transition hover:border-primary/30">
               {(() => {
                 const img = getMapImage(m.selected_map);
                 return img ? (

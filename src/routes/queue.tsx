@@ -620,7 +620,7 @@ function QueuePage() {
         </Dialog>
 
         {/* Queue Action Card */}
-        <Card className="border-border bg-gradient-to-br from-card to-card/50 p-6">
+        <Card className="border-border/60 bg-card p-6">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -723,33 +723,31 @@ function QueuePage() {
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ delay: i * 0.05 }}
                 >
-                  <Card className="border-border bg-muted/30 p-3 transition-colors hover:bg-muted/50">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <Avatar className="h-10 w-10 border-2 border-border">
-                          <AvatarImage src={avatarUrl(p)} alt={p.username} />
-                          <AvatarFallback>{p.username.slice(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-success" />
+                  <div className="flex items-center gap-3 rounded-lg border border-border/40 bg-muted/20 p-3 transition-colors hover:bg-muted/40">
+                    <div className="relative">
+                      <Avatar className="h-10 w-10 border-2 border-border">
+                        <AvatarImage src={avatarUrl(p)} alt={p.username} />
+                        <AvatarFallback>{p.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-success" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-medium">{p.username}</div>
+                        {p.user_id === session?.user_id && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">YOU</Badge>
+                        )}
+                        {partyMembers.includes(p.user_id) && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-primary border-primary/30">
+                            PARTY
+                          </Badge>
+                        )}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className="text-sm font-medium">{p.username}</div>
-                          {p.user_id === session?.user_id && (
-                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">YOU</Badge>
-                          )}
-                          {partyMembers.includes(p.user_id) && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-primary border-primary/30">
-                              PARTY
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="text-[11px] text-muted-foreground">
-                          Joined {getTimeInQueue(p.joined_at)} ago
-                        </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        Joined {getTimeInQueue(p.joined_at)} ago
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>

@@ -113,8 +113,8 @@ function Leaderboard() {
 
 function AllTimeTable({ rows }: { rows: PlayerRow[]; q: string }) {
   return (
-    <Card className="overflow-hidden border-border bg-card">
-      <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border bg-muted/40 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <Card className="overflow-hidden border-border/60 bg-card">
+      <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         <span>Rank</span>
         <span>Player</span>
         <span className="text-right">ELO</span>
@@ -131,7 +131,7 @@ function AllTimeTable({ rows }: { rows: PlayerRow[]; q: string }) {
               key={p.discord_id}
               to="/players/$username"
               params={{ username: name }}
-              className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 px-4 py-3 transition last:border-b-0 hover:bg-muted/40"
+              className={`grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/40 px-4 py-3 transition last:border-b-0 hover:bg-muted/30 ${i % 2 === 1 ? "bg-muted/10" : ""}`}
             >
               <div className="flex items-center gap-1.5">
                 <span className={`font-display text-sm font-bold ${i < 3 ? "text-primary" : "text-muted-foreground"}`}>
@@ -167,8 +167,8 @@ function AllTimeTable({ rows }: { rows: PlayerRow[]; q: string }) {
 
 function PeriodTable({ rows }: { rows: PeriodPlayerRow[]; q: string }) {
   return (
-    <Card className="overflow-hidden border-border bg-card">
-      <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border bg-muted/40 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <Card className="overflow-hidden border-border/60 bg-card">
+      <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         <span>Rank</span>
         <span>Player</span>
         <span className="text-right">+/- ELO</span>
@@ -186,7 +186,7 @@ function PeriodTable({ rows }: { rows: PeriodPlayerRow[]; q: string }) {
               key={p.discord_id}
               to="/players/$username"
               params={{ username: name }}
-              className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 px-4 py-3 transition last:border-b-0 hover:bg-muted/40"
+              className={`grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/40 px-4 py-3 transition last:border-b-0 hover:bg-muted/30 ${i % 2 === 1 ? "bg-muted/10" : ""}`}
             >
               <div className="flex items-center gap-1.5">
                 <span className={`font-display text-sm font-bold ${i < 3 ? "text-primary" : "text-muted-foreground"}`}>
