@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/lib/supabase";
 import { getPlayersByIds, avatarUrl } from "@/lib/supabase-queries";
 import { getMapImage } from "@/lib/maps";
@@ -37,16 +36,12 @@ export const Route = createFileRoute("/matches/$id")({
     ],
   }),
   notFoundComponent: () => (
-    <AppShell>
       <div className="p-10 text-center text-muted-foreground">Match not found.</div>
-    </AppShell>
   ),
   errorComponent: ({ error }) => (
-    <AppShell>
       <div className="p-10 text-center text-muted-foreground">
         Couldn't load this match. {(error as Error)?.message}
       </div>
-    </AppShell>
   ),
   component: MatchPage,
 });
@@ -60,7 +55,6 @@ function MatchPage() {
   const defEloChange = match.def_team.reduce((sum: number, id: string) => sum + (eloChanges[id] || 0), 0);
 
   return (
-    <AppShell>
       <div className="space-y-6 p-4 lg:p-6">
         <Button
           asChild
@@ -169,7 +163,6 @@ function MatchPage() {
           />
         </div>
       </div>
-    </AppShell>
   );
 }
 

@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Swords, MapPin, Clock, Trophy, ChevronRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/lib/supabase";
 import { getMapImage } from "@/lib/maps";
 import { parseSession, getActiveGuildId } from "@/lib/session";
@@ -26,7 +25,6 @@ function MatchesList() {
   const { matches } = Route.useLoaderData();
 
   return (
-    <AppShell>
       <div className="space-y-6 p-4 lg:p-6">
         <div>
           <div className="section-title flex items-center gap-2">
@@ -106,6 +104,5 @@ function MatchesList() {
           )}
         </div>
       </div>
-    </AppShell>
   );
 }
