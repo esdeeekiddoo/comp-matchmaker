@@ -42,7 +42,7 @@ function ProfilePage() {
     try {
       const guildId = getActiveGuildId(s) || undefined;
       const [playerData, matchData] = await Promise.all([
-        getPlayerByDiscordId(userId),
+        getPlayerByDiscordId(userId, guildId),
         getPlayerMatches(userId, 10, guildId),
       ]);
       setPlayer(playerData);

@@ -187,7 +187,16 @@ export function avatarUrl(row: { discord_id?: string; user_id?: string; avatar_u
   return `https://cdn.discordapp.com/embed/avatars/${Number(id) % 5}.png`;
 }
 
-export async function getPlayerByDiscordId(discordId: string): Promise<PlayerRow | null> {
+export async function getPlayerByDiscordId(discordId: string, guildId?: string): Promise<PlayerRow | null> {
+  if (guildId) {
+    const { data } = await supabase
+      .from("guild_players")
+      .select("discord_id, elo, wins, losses")
+      .eq("discord_id", discordId)
+      .eq("guild_id", guildId)
+      .single();
+    if (data) return data as PlayerRow;
+  }
   const { data } = await supabase
     .from("players")
     .select("discord_id, username, avatar_url, elo, wins, losses")
