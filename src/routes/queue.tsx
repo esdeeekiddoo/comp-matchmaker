@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -71,6 +71,8 @@ function QueuePage() {
   const [matchPlayers, setMatchPlayers] = useState<{ user_id: string; username: string; avatar_url: string }[]>([]);
   const [banInfo, setBanInfo] = useState<{ banned: boolean; expires_at?: string; reason?: string } | null>(null);
   const [banCountdown, setBanCountdown] = useState("");
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const prevMatchRef = useRef<any>(null);
 
   useEffect(() => {
     setSession(parseSession());
@@ -164,6 +166,39 @@ function QueuePage() {
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
   }, [banInfo]);
+
+  useEffect(() => {
+    if (session && typeof Notification !== "undefined" && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, [session]);
+
+  useEffect(() => {
+    if (prevMatchRef.current === null && activeMatch) {
+      try {
+        const ctx = audioCtxRef.current || new AudioContext();
+        audioCtxRef.current = ctx;
+        if (ctx.state === "suspended") ctx.resume();
+        function playTone(freq: number, start: number, duration: number) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+          osc.connect(gain).connect(ctx.destination);
+          osc.start(ctx.currentTime + start);
+          osc.stop(ctx.currentTime + start + duration);
+        }
+        playTone(880, 0, 0.15);
+        playTone(1100, 0.15, 0.2);
+      } catch {}
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+        new Notification("Match Found!", { body: "Your match is ready. Check the queue page.", icon: "/APL.jpg" });
+      }
+    }
+    prevMatchRef.current = activeMatch;
+  }, [activeMatch]);
 
   useEffect(() => {
     fetchQueue();
