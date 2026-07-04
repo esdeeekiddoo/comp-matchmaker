@@ -136,11 +136,8 @@ export default defineEventHandler(async (event) => {
 
     let player = Array.isArray(players) && players.length > 0 ? players[0] : null;
 
-    if (!player && guildId) {
-      const fallback = await fetch(`${supabaseUrl}/rest/v1/players?discord_id=eq.${userId}&select=discord_id,username,avatar_url,elo,wins,losses`, {
-        headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" },
-      }).then(r => { if (!r.ok) throw new Error(`Supabase ${r.status}`); return r.json(); });
-      player = Array.isArray(fallback) && fallback.length > 0 ? fallback[0] : null;
+    if (guildId && !player) {
+      player = { discord_id: userId, elo: 0, wins: 0, losses: 0 };
     }
 
     if (!player) { setResponseStatus(event, 404); return { error: "Player not found" }; }
