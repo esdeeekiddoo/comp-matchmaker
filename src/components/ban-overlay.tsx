@@ -9,8 +9,7 @@ import {
   Sword, CheckCircle2,
 } from "lucide-react";
 import { avatarUrl } from "@/lib/supabase-queries";
-
-const MAP_POOL = ["Mirage", "Dust", "Inferno", "Cache", "Nuke", "Overpass", "Train"];
+import { MAP_POOL, getMapImage } from "@/lib/maps";
 
 type BanMatchRow = {
   id: string;
@@ -287,31 +286,46 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {MAP_POOL.map((mapName) => {
                   const isBanned = bans.includes(mapName);
+                  const mapImg = getMapImage(mapName);
                   return (
                     <motion.button
                       key={mapName}
                       layout
                       onClick={() => handleBan(mapName)}
                       disabled={isBanned || banning === mapName || !canBan || timeLeft === 0}
-                      className={`relative flex flex-col items-center gap-1.5 rounded-lg border p-3 text-center transition-all ${
+                      className={`relative flex flex-col items-center gap-0 overflow-hidden rounded-xl border text-center transition-all ${
                         isBanned
-                          ? "border-muted-foreground/20 bg-muted/20 opacity-40"
+                          ? "border-muted-foreground/20 opacity-40"
                           : canBan && timeLeft > 0
-                            ? "border-primary/30 bg-primary/5 hover:border-primary/60 hover:bg-primary/10 cursor-pointer"
-                            : "border-border bg-muted/30"
+                            ? "border-primary/30 hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10 cursor-pointer"
+                            : "border-border"
                       }`}
                       whileTap={canBan ? { scale: 0.95 } : undefined}
-                      whileHover={canBan ? { scale: 1.05 } : undefined}
+                      whileHover={canBan ? { scale: 1.03 } : undefined}
                     >
-                      {isBanned ? (
-                        <ShieldX className="h-6 w-6 text-muted-foreground" />
-                      ) : (
-                        <Map className="h-6 w-6 text-primary" />
-                      )}
-                      <span className="text-xs font-medium">{mapName}</span>
+                      <div className="relative h-16 w-full overflow-hidden">
+                        {mapImg ? (
+                          <img
+                            src={mapImg}
+                            alt={mapName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-muted/50">
+                            <Map className="h-6 w-6 text-muted-foreground/50" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+                        {isBanned && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
+                            <ShieldX className="h-8 w-8 text-destructive" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="w-full bg-card/80 py-1.5 text-xs font-semibold text-foreground">{mapName}</span>
                       {banning === mapName && (
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background/60">
-                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-background/60 backdrop-blur-sm">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
                         </div>
                       )}
                     </motion.button>
