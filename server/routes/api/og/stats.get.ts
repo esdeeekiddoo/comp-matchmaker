@@ -135,10 +135,17 @@ export default defineEventHandler(async (event) => {
     ]);
 
     let player = Array.isArray(players) && players.length > 0 ? players[0] : null;
+
+    if (!player && guildId) {
+      const fallback = await fetch(`${supabaseUrl}/rest/v1/players?discord_id=eq.${userId}&select=discord_id,username,avatar_url,elo,wins,losses`, {
+        headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" },
+      }).then(r => { if (!r.ok) throw new Error(`Supabase ${r.status}`); return r.json(); });
+      player = Array.isArray(fallback) && fallback.length > 0 ? fallback[0] : null;
+    }
+
     if (!player) { setResponseStatus(event, 404); return { error: "Player not found" }; }
 
-    // If guild-scoped, fetch username/avatar from players table
-    if (guildId) {
+    if (guildId && !player.username) {
       const userRes = await fetch(`${supabaseUrl}/rest/v1/players?discord_id=eq.${userId}&select=discord_id,username,avatar_url`, {
         headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" },
       }).then(r => r.json());

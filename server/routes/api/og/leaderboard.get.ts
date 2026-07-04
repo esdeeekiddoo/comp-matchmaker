@@ -70,7 +70,15 @@ export default defineEventHandler(async (event) => {
       );
       if (!res.ok) throw new Error(`Supabase ${res.status}`);
       const guildRows = await res.json();
-      if (!Array.isArray(guildRows) || guildRows.length === 0) { setResponseStatus(event, 404); return { error: "No players found" }; }
+      if (!Array.isArray(guildRows) || guildRows.length === 0) {
+        const fallback = await fetch(
+          `${supabaseUrl}/rest/v1/players?select=discord_id,username,avatar_url,elo,wins,losses&order=elo.desc&limit=10`,
+          { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: "application/json" } }
+        );
+        if (!fallback.ok) throw new Error(`Supabase ${fallback.status}`);
+        players = await fallback.json();
+        if (!Array.isArray(players) || players.length === 0) { setResponseStatus(event, 404); return { error: "No players found" }; }
+      } else {
       const ids = guildRows.map((r: any) => r.discord_id);
       const userRes = await fetch(
         `${supabaseUrl}/rest/v1/players?select=discord_id,username,avatar_url&discord_id=in.(${ids.join(',')})`,
@@ -87,6 +95,7 @@ export default defineEventHandler(async (event) => {
         wins: r.wins,
         losses: r.losses,
       }));
+      }
     } else {
       const res = await fetch(
         `${supabaseUrl}/rest/v1/players?select=discord_id,username,avatar_url,elo,wins,losses&order=elo.desc&limit=10`,
