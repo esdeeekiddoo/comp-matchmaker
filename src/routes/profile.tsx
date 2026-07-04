@@ -10,11 +10,12 @@ import { RankBadge } from "@/components/rank-badge";
 import { 
   User, Trophy, Target, TrendingUp, Calendar, 
   Swords, Shield, Flame, BarChart3, ExternalLink,
-  ChevronRight, Zap
+  ChevronRight, Zap, MapPin
 } from "lucide-react";
 import { getPlayerByDiscordId, getPlayerMatches, avatarUrl } from "@/lib/supabase-queries";
 import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
 import { rankFromElo, RANK_COLORS, type Rank } from "@/lib/ranks";
+import { getMapImage } from "@/lib/maps";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -248,47 +249,65 @@ function ProfilePage() {
           </div>
           <div className="space-y-2">
             {matches.length > 0 ? (
-              matches.map((m) => (
-                <Link
-                  key={m.id}
-                  to="/matches/$id"
-                  params={{ id: m.id }}
-                  className="block"
-                >
-                  <Card className="border-border/40 bg-muted/20 p-3 transition-all duration-200 hover:bg-muted/40 hover:border-border/60">
-                    <div className="flex items-center justify-between">
+              matches.map((m) => {
+                const mapImg = getMapImage(m.selected_map);
+                return (
+                  <Link
+                    key={m.id}
+                    to="/matches/$id"
+                    params={{ id: m.id }}
+                    className="block"
+                  >
+                    <Card className="border-border/40 bg-muted/20 p-3 transition-all duration-200 hover:bg-muted/40 hover:border-border/60">
                       <div className="flex items-center gap-3">
-                        <Badge
-                          className={`w-16 justify-center ${
-                            m.winner === "atk"
-                              ? "bg-success/20 text-success border-success/30"
-                              : "bg-destructive/20 text-destructive border-destructive/30"
-                          }`}
-                        >
-                          {m.winner === "atk" ? "WIN" : "LOSS"}
-                        </Badge>
-                        <div>
-                          <div className="text-sm font-medium text-foreground">{m.selected_map || "Unknown"}</div>
-                          <div className="text-xs text-muted-foreground">
-                            Match #{m.match_number} · {m.region}
+                        {mapImg ? (
+                          <div className="h-12 w-20 shrink-0 overflow-hidden rounded-lg">
+                            <img
+                              src={mapImg}
+                              alt={m.selected_map ?? ""}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex h-12 w-20 shrink-0 items-center justify-center rounded-lg bg-muted/50">
+                            <MapPin className="h-5 w-5 text-muted-foreground/50" />
+                          </div>
+                        )}
+                        <div className="flex flex-1 items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Badge
+                              className={`w-16 justify-center ${
+                                m.winner === "atk"
+                                  ? "bg-success/20 text-success border-success/30"
+                                  : "bg-destructive/20 text-destructive border-destructive/30"
+                              }`}
+                            >
+                              {m.winner === "atk" ? "WIN" : "LOSS"}
+                            </Badge>
+                            <div>
+                              <div className="text-sm font-medium text-foreground">{m.selected_map || "Unknown"}</div>
+                              <div className="text-xs text-muted-foreground">
+                                Match #{m.match_number} · {m.region}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`text-sm font-semibold ${
+                              m.winner === "atk" ? "text-success" : "text-destructive"
+                            }`}>
+                              {m.winner === "atk" ? "+" : "-"}
+                              {Math.abs(m.elo_change || 0)} ELO
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(m.created_at).toLocaleDateString()}
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className={`text-sm font-semibold ${
-                          m.winner === "atk" ? "text-success" : "text-destructive"
-                        }`}>
-                          {m.winner === "atk" ? "+" : "-"}
-                          {Math.abs(m.elo_change || 0)} ELO
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(m.created_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              ))
+                    </Card>
+                  </Link>
+                );
+              })
             ) : (
               <div className="py-12 text-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted/30">
