@@ -21,6 +21,20 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const now = new Date().toISOString();
+    const banRes = await fetch(
+      `${url}/rest/v1/queue_bans?guild_id=eq.${guildId}&discord_id=eq.${userId}&expires_at=gt.${now}&select=id,expires_at`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` } },
+    );
+    const bans = await banRes.json();
+    if (Array.isArray(bans) && bans.length > 0) {
+      const expiresAt = new Date(bans[0].expires_at).getTime();
+      const remainingMs = expiresAt - Date.now();
+      const remainingH = Math.ceil(remainingMs / 3600000);
+      setResponseStatus(event, 403);
+      return { ok: false, error: `You are banned from the queue. Expires in ${remainingH}h.` };
+    }
+
     const matchesRes = await fetch(
       `${url}/rest/v1/matches?select=atk_team,def_team,status&status=eq.active&guild_id=eq.${guildId}`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` } },

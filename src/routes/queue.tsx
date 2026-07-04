@@ -69,6 +69,8 @@ function QueuePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeMatch, setActiveMatch] = useState<any>(null);
   const [matchPlayers, setMatchPlayers] = useState<{ user_id: string; username: string; avatar_url: string }[]>([]);
+  const [banInfo, setBanInfo] = useState<{ banned: boolean; expires_at?: string; reason?: string } | null>(null);
+  const [banCountdown, setBanCountdown] = useState("");
 
   useEffect(() => {
     setSession(parseSession());
@@ -129,6 +131,39 @@ function QueuePage() {
       // ignore polling errors
     }
   }, [session]);
+
+  const fetchBanStatus = useCallback(async () => {
+    if (!session) { setBanInfo(null); return; }
+    try {
+      const guildId = getGuildId();
+      const res = await fetch(`/api/queue/ban-status?userId=${session.user_id}${guildId ? `&guildId=${guildId}` : ""}`);
+      const data = await res.json();
+      setBanInfo(data);
+    } catch {
+      setBanInfo(null);
+    }
+  }, [session]);
+
+  useEffect(() => {
+    fetchBanStatus();
+    const interval = setInterval(fetchBanStatus, 5000);
+    return () => clearInterval(interval);
+  }, [fetchBanStatus]);
+
+  useEffect(() => {
+    if (!banInfo?.banned || !banInfo.expires_at) { setBanCountdown(""); return; }
+    const update = () => {
+      const ms = new Date(banInfo.expires_at!).getTime() - Date.now();
+      if (ms <= 0) { setBanCountdown(""); setBanInfo({ banned: false }); return; }
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      setBanCountdown(h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`);
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [banInfo]);
 
   useEffect(() => {
     fetchQueue();
@@ -582,6 +617,27 @@ function QueuePage() {
                 <a href="/api/auth/discord">
                   <LogIn className="h-4 w-4" /> Login with Discord
                 </a>
+              </Button>
+            </div>
+          ) : banInfo?.banned ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                    <X className="h-5 w-5 text-destructive" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-destructive">Banned from Queue</div>
+                    <div className="text-sm text-muted-foreground">
+                      Expires in {banCountdown}
+                      {banInfo.reason ? ` — ${banInfo.reason}` : ""}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <Button disabled className="w-full gap-2 h-12 text-base opacity-50">
+                <Users className="h-5 w-5" />
+                Join Queue
               </Button>
             </div>
           ) : inQueue ? (
