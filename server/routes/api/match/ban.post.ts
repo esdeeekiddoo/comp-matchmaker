@@ -1,6 +1,6 @@
 import { defineEventHandler, readBody, setResponseStatus } from "h3";
 
-const MAPS = ["Mirage", "Dust", "Inferno", "Cache", "Nuke", "Overpass", "Train"];
+const MAPS = ["Mirage", "Inferno", "Overpass", "Nuke", "Vertigo", "Dust 2", "Cache"];
 
 async function notifyDiscord(match: any, picked: string): Promise<{ notified: boolean; error?: string }> {
   const token = process.env.DISCORD_TOKEN;

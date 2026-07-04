@@ -74,7 +74,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
   }, [match.bans]);
 
   useEffect(() => {
-    if (timeLeft <= 0 || selectedMap) return;
+    if (selectedMap || timeLeft > 0) return;
     console.log("[ban-overlay] timeLeft=0, starting auto-pick polling");
     const interval = setInterval(async () => {
       try {

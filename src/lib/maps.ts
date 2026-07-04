@@ -20,6 +20,8 @@ const mapImages: Record<string, string> = {
   Vertigo: VertigoImg,
   "Dust 2": Dust2Img,
   Cache: CacheImg,
+  // backward-compatible aliases for old matches
+  Dust: Dust2Img,
 };
 
 export function getMapImage(name: string | null | undefined): string | null {
