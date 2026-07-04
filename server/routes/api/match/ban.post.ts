@@ -68,8 +68,26 @@ export default defineEventHandler(async (event) => {
       return { ok: false, error: "Map already selected" };
     }
 
-    const currentBans: string[] = match.bans || [];
-    const banners = match.banners || {};
+    function parseMaybeJsonArray(val: any): string[] {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string") {
+        try { return JSON.parse(val); } catch (e) { return []; }
+      }
+      return [];
+    }
+
+    function parseMaybeJsonObject(val: any): Record<string, any> {
+      if (!val) return {};
+      if (typeof val === "object") return val;
+      if (typeof val === "string") {
+        try { return JSON.parse(val); } catch (e) { return {}; }
+      }
+      return {};
+    }
+
+    const currentBans: string[] = parseMaybeJsonArray(match.bans);
+    const banners = parseMaybeJsonObject(match.banners);
 
     if (currentBans.includes(mapName)) {
       return { ok: false, error: "Map already banned" };

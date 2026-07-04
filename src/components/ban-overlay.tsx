@@ -39,13 +39,32 @@ type Props = {
 };
 
 export function BanOverlay({ match, session, players, onMapSelected }: Props) {
-  const [bans, setBans] = useState<string[]>(match.bans || []);
+  function parseMaybeBans(val: any): string[] {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === "string") {
+      try { return JSON.parse(val); } catch (e) { return []; }
+    }
+    return [];
+  }
+
+  function parseMaybeBanners(val: any): Record<string, string> {
+    if (!val) return {} as Record<string, string>;
+    if (typeof val === "object") return val as Record<string, string>;
+    if (typeof val === "string") {
+      try { return JSON.parse(val); } catch (e) { return {} as Record<string, string>; }
+    }
+    return {} as Record<string, string>;
+  }
+
+  const [bans, setBans] = useState<string[]>(parseMaybeBans(match.bans));
   const [selectedMap, setSelectedMap] = useState<string | null>(match.selected_map);
   const [banning, setBanning] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(-1);
 
-  const userIsBanner = match.banners?.atk === session.user_id || match.banners?.def === session.user_id;
-  const isAtkBanner = match.banners?.atk === session.user_id;
+  const parsedBanners = parseMaybeBanners(match.banners);
+  const userIsBanner = parsedBanners?.atk === session.user_id || parsedBanners?.def === session.user_id;
+  const isAtkBanner = parsedBanners?.atk === session.user_id;
   const myTeam = isAtkBanner ? "atk" : "def";
   const remainingMaps = MAP_POOL.filter((m) => !bans.includes(m));
   const myBanCount = myTeam === "atk"
@@ -70,7 +89,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
   }, [match.selected_map]);
 
   useEffect(() => {
-    if (match.bans) setBans(match.bans);
+    setBans(parseMaybeBans(match.bans));
   }, [match.bans]);
 
   useEffect(() => {
@@ -203,7 +222,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
                     <AvatarFallback className="text-[9px]">{playerName(uid).slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <span className="flex-1 truncate text-sm">{playerName(uid)}</span>
-                  {match.banners?.atk === uid && (
+                  {parsedBanners?.atk === uid && (
                     <Shield className="h-3.5 w-3.5 text-red-400" />
                   )}
                 </div>
@@ -235,7 +254,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
                     <AvatarFallback className="text-[9px]">{playerName(uid).slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <span className="flex-1 truncate text-sm">{playerName(uid)}</span>
-                  {match.banners?.def === uid && (
+                  {parsedBanners?.def === uid && (
                     <Shield className="h-3.5 w-3.5 text-blue-400" />
                   )}
                 </div>
