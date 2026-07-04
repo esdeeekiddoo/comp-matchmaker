@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { Trophy, Search, TrendingUp, Flame } from "lucide-react";
+import { Trophy, Search, TrendingUp, Flame, Crown, Medal } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -63,7 +63,7 @@ function Leaderboard() {
             </div>
             <h1 className="text-display mt-1 text-3xl font-bold">Season 1 Ladder</h1>
             <p className="text-sm text-muted-foreground">
-              Live standings across all regions · Updated every match
+              Live standings · Updated every match
             </p>
           </div>
           <div className="relative">
@@ -78,15 +78,15 @@ function Leaderboard() {
         </div>
 
         {/* Tab Bar */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-2">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+              className={`rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
                 tab === t.key
-                  ? "bg-primary text-primary-foreground shadow"
-                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               {t.key === "week" || t.key === "month" ? (
@@ -114,52 +114,71 @@ function Leaderboard() {
 function AllTimeTable({ rows }: { rows: PlayerRow[]; q: string }) {
   return (
     <Card className="overflow-hidden border-border/60 bg-card">
-      <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-        <span>Rank</span>
-        <span>Player</span>
-        <span className="text-right">ELO</span>
-        <span className="text-right">W/L</span>
-        <span className="text-right">Win%</span>
-      </div>
-      <div>
-        {rows.map((p, i) => {
-          const total = p.wins + p.losses;
-          const winPct = total > 0 ? Math.round((p.wins / total) * 100) : 0;
-          const name = p.username ?? p.discord_id;
-          return (
-            <Link
-              key={p.discord_id}
-              to="/players/$username"
-              params={{ username: name }}
-              className={`grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/40 px-4 py-3 transition last:border-b-0 hover:bg-muted/30 ${i % 2 === 1 ? "bg-muted/10" : ""}`}
-            >
-              <div className="flex items-center gap-1.5">
-                <span className={`font-display text-sm font-bold ${i < 3 ? "text-primary" : "text-muted-foreground"}`}>
-                  #{i + 1}
-                </span>
-              </div>
-              <div className="flex min-w-0 items-center gap-3">
-                <Avatar className="h-8 w-8 border border-border">
-                  <AvatarImage src={avatarUrl(p)} />
-                  <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div className="truncate text-sm font-medium">{name}</div>
-              </div>
-              <div className="text-right font-display font-bold text-primary">{p.elo}</div>
-              <div className="text-right text-sm tabular-nums">
-                <span className="text-success">{p.wins}</span>
-                <span className="text-muted-foreground">/</span>
-                <span className="text-destructive">{p.losses}</span>
-              </div>
-              <div className="text-right text-sm font-semibold tabular-nums">{winPct}%</div>
-            </Link>
+      <div className="overflow-x-auto">
+        <div className="min-w-[500px]">
+          <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <span>Rank</span>
+            <span>Player</span>
+            <span className="text-right">ELO</span>
+            <span className="text-right">W/L</span>
+            <span className="text-right">Win%</span>
+          </div>
+          <div>
+            {rows.map((p, i) => {
+              const total = p.wins + p.losses;
+              const winPct = total > 0 ? Math.round((p.wins / total) * 100) : 0;
+              const name = p.username ?? p.discord_id;
+              const isTop3 = i < 3;
+              return (
+                <Link
+                  key={p.discord_id}
+                  to="/players/$username"
+                  params={{ username: name }}
+                  className={`grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/40 px-4 py-3.5 transition-all duration-200 last:border-b-0 hover:bg-muted/30 ${
+                    i % 2 === 1 ? "bg-muted/10" : ""
+                  } ${isTop3 ? "bg-primary/5 hover:bg-primary/10" : ""}`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    {isTop3 ? (
+                      <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${
+                        i === 0 ? "bg-yellow-500/20 text-yellow-500" :
+                        i === 1 ? "bg-slate-300/20 text-slate-300" :
+                        "bg-amber-600/20 text-amber-600"
+                      }`}>
+                        {i === 0 ? <Crown className="h-4 w-4" /> : <Medal className="h-4 w-4" />}
+                      </div>
+                    ) : (
+                      <span className="font-display text-sm font-bold text-muted-foreground">
+                        #{i + 1}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Avatar className={`h-9 w-9 border-2 ${isTop3 ? "border-primary/50" : "border-border"}`}>
+                      <AvatarImage src={avatarUrl(p)} />
+                      <AvatarFallback className="bg-muted text-xs">{name.slice(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div className="truncate text-sm font-medium text-foreground">{name}</div>
+                  </div>
+                  <div className="text-right font-display font-bold text-primary">{p.elo}</div>
+                  <div className="text-right text-sm tabular-nums">
+                    <span className="text-success">{p.wins}</span>
+                    <span className="text-muted-foreground">/</span>
+                    <span className="text-destructive">{p.losses}</span>
+                  </div>
+                  <div className="text-right text-sm font-semibold tabular-nums text-foreground">{winPct}%</div>
+                </Link>
           );
         })}
         {rows.length === 0 && (
-          <div className="px-4 py-10 text-center text-sm text-muted-foreground">
-            No players yet. Matches are tracked after they end.
+          <div className="px-4 py-12 text-center">
+            <Trophy className="mx-auto h-8 w-8 text-muted-foreground/30 mb-2" />
+            <p className="text-sm text-muted-foreground">No players yet</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">Matches are tracked after they end</p>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </Card>
   );
@@ -168,57 +187,75 @@ function AllTimeTable({ rows }: { rows: PlayerRow[]; q: string }) {
 function PeriodTable({ rows }: { rows: PeriodPlayerRow[]; q: string }) {
   return (
     <Card className="overflow-hidden border-border/60 bg-card">
-      <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-        <span>Rank</span>
-        <span>Player</span>
-        <span className="text-right">+/- ELO</span>
-        <span className="text-right">W/L</span>
-        <span className="text-right">Matches</span>
-      </div>
-      <div>
-        {rows.map((p, i) => {
-          const periodTotal = p.period_wins + p.period_losses;
-          const periodWinPct = periodTotal > 0 ? Math.round((p.period_wins / periodTotal) * 100) : 0;
-          const name = p.username ?? p.discord_id;
-          const gained = p.elo_gained;
-          return (
-            <Link
-              key={p.discord_id}
-              to="/players/$username"
-              params={{ username: name }}
-              className={`grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/40 px-4 py-3 transition last:border-b-0 hover:bg-muted/30 ${i % 2 === 1 ? "bg-muted/10" : ""}`}
-            >
-              <div className="flex items-center gap-1.5">
-                <span className={`font-display text-sm font-bold ${i < 3 ? "text-primary" : "text-muted-foreground"}`}>
-                  #{i + 1}
-                </span>
-              </div>
-              <div className="flex min-w-0 items-center gap-3">
-                <Avatar className="h-8 w-8 border border-border">
-                  <AvatarImage src={avatarUrl(p)} />
-                  <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div className="truncate text-sm font-medium">{name}</div>
-              </div>
-              <div className={`text-right font-display font-bold tabular-nums ${gained > 0 ? "text-success" : gained < 0 ? "text-destructive" : "text-muted-foreground"}`}>
-                {gained > 0 ? "+" : ""}{gained}
-              </div>
-              <div className="text-right text-sm tabular-nums">
-                <span className="text-success">{p.period_wins}</span>
-                <span className="text-muted-foreground">/</span>
-                <span className="text-destructive">{p.period_losses}</span>
-              </div>
-              <div className="text-right text-sm font-semibold tabular-nums text-muted-foreground">
-                {periodTotal > 0 ? `${periodWinPct}%` : "—"}
-              </div>
-            </Link>
-          );
-        })}
-        {rows.length === 0 && (
-          <div className="px-4 py-10 text-center text-sm text-muted-foreground">
-            No matches in this period.
+      <div className="overflow-x-auto">
+        <div className="min-w-[500px]">
+          <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <span>Rank</span>
+            <span>Player</span>
+            <span className="text-right">+/- ELO</span>
+            <span className="text-right">W/L</span>
+            <span className="text-right">Win%</span>
           </div>
-        )}
+          <div>
+            {rows.map((p, i) => {
+              const periodTotal = p.period_wins + p.period_losses;
+              const periodWinPct = periodTotal > 0 ? Math.round((p.period_wins / periodTotal) * 100) : 0;
+              const name = p.username ?? p.discord_id;
+              const gained = p.elo_gained;
+              const isTop3 = i < 3;
+              return (
+                <Link
+                  key={p.discord_id}
+                  to="/players/$username"
+                  params={{ username: name }}
+                  className={`grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/40 px-4 py-3.5 transition-all duration-200 last:border-b-0 hover:bg-muted/30 ${
+                    i % 2 === 1 ? "bg-muted/10" : ""
+                  } ${isTop3 ? "bg-primary/5 hover:bg-primary/10" : ""}`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    {isTop3 ? (
+                      <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${
+                        i === 0 ? "bg-yellow-500/20 text-yellow-500" :
+                        i === 1 ? "bg-slate-300/20 text-slate-300" :
+                        "bg-amber-600/20 text-amber-600"
+                      }`}>
+                        {i === 0 ? <Crown className="h-4 w-4" /> : <Medal className="h-4 w-4" />}
+                      </div>
+                    ) : (
+                      <span className="font-display text-sm font-bold text-muted-foreground">
+                        #{i + 1}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Avatar className={`h-9 w-9 border-2 ${isTop3 ? "border-primary/50" : "border-border"}`}>
+                      <AvatarImage src={avatarUrl(p)} />
+                      <AvatarFallback className="bg-muted text-xs">{name.slice(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div className="truncate text-sm font-medium text-foreground">{name}</div>
+                  </div>
+                  <div className={`text-right font-display font-bold tabular-nums ${gained > 0 ? "text-success" : gained < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                    {gained > 0 ? "+" : ""}{gained}
+                  </div>
+                  <div className="text-right text-sm tabular-nums">
+                    <span className="text-success">{p.period_wins}</span>
+                    <span className="text-muted-foreground">/</span>
+                    <span className="text-destructive">{p.period_losses}</span>
+                  </div>
+                  <div className="text-right text-sm font-semibold tabular-nums text-foreground">
+                    {periodTotal > 0 ? `${periodWinPct}%` : "—"}
+                  </div>
+                </Link>
+              );
+            })}
+            {rows.length === 0 && (
+              <div className="px-4 py-12 text-center">
+                <Trophy className="mx-auto h-8 w-8 text-muted-foreground/30 mb-2" />
+                <p className="text-sm text-muted-foreground">No matches in this period</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </Card>
   );

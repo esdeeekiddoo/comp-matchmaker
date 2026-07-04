@@ -1,9 +1,10 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Crown, Plus } from "lucide-react";
+import { ArrowLeft, Crown, Plus, TrendingUp, TrendingDown, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/lib/supabase";
 import { getPlayersByIds, avatarUrl } from "@/lib/supabase-queries";
 import { getMapImage } from "@/lib/maps";
@@ -55,97 +56,120 @@ function MatchPage() {
   const winner = match.winner;
   const eloChanges = (match.elo_changes as Record<string, number>) ?? {};
 
+  const atkEloChange = match.atk_team.reduce((sum: number, id: string) => sum + (eloChanges[id] || 0), 0);
+  const defEloChange = match.def_team.reduce((sum: number, id: string) => sum + (eloChanges[id] || 0), 0);
+
   return (
-    <div className="space-y-6 p-4 lg:p-6">
-      <Button
-        asChild
-        variant="ghost"
-        size="sm"
-        className="gap-1 text-muted-foreground hover:text-foreground"
-      >
-        <Link to="/matches">
-          <ArrowLeft className="h-4 w-4" /> Back to matches
-        </Link>
-      </Button>
+    <AppShell>
+      <div className="space-y-6 p-4 lg:p-6">
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="gap-1 text-muted-foreground hover:text-foreground"
+        >
+          <Link to="/matches">
+            <ArrowLeft className="h-4 w-4" /> Back to matches
+          </Link>
+        </Button>
 
-      <Card className="overflow-hidden border-border bg-card">
-        {(() => {
-          const img = getMapImage(match.selected_map);
-          return img ? (
-            <div className="relative h-48 overflow-hidden">
-              <img
-                src={img}
-                alt={match.selected_map ?? ""}
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <Badge
-                  variant="outline"
-                  className="border-border/60 bg-background/60 text-[10px] backdrop-blur-sm"
-                >
-                  Match #{match.match_number}
-                </Badge>
-                <h2 className="text-display mt-2 text-2xl font-extrabold text-white drop-shadow-lg">
-                  {match.selected_map ?? "Voting"}
-                </h2>
+        <Card className="card-faceit overflow-hidden border-border bg-card">
+          {(() => {
+            const img = getMapImage(match.selected_map);
+            return img ? (
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src={img}
+                  alt={match.selected_map ?? ""}
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <Badge
+                    variant="outline"
+                    className="border-border/60 bg-background/60 text-[10px] backdrop-blur-sm"
+                  >
+                    Match #{match.match_number}
+                  </Badge>
+                  <h2 className="text-display mt-2 text-2xl font-extrabold text-white drop-shadow-lg">
+                    {match.selected_map ?? "Voting"}
+                  </h2>
+                </div>
               </div>
+            ) : (
+              <div className="flex items-center gap-4 bg-muted/30 p-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-muted/50">
+                  <MapPin className="h-7 w-7 text-muted-foreground/50" />
+                </div>
+                <div>
+                  <Badge variant="outline" className="border-border text-[10px]">
+                    Match #{match.match_number}
+                  </Badge>
+                  <h2 className="text-display mt-1 text-2xl font-extrabold">
+                    {match.selected_map ?? "Voting"}
+                  </h2>
+                </div>
+              </div>
+            );
+          })()}
+          <div className="flex flex-wrap items-center gap-3 border-t border-border px-6 py-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {match.region}
+            </span>
+            <span>· {new Date(match.created_at).toLocaleString()}</span>
+          </div>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 border-t border-border p-6">
+            <div className="text-right">
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">T</div>
+              <div className={`text-display text-3xl font-extrabold ${winner === "atk" ? "text-success" : "text-muted-foreground"}`}>
+                {winner === "atk" ? "WIN" : "LOSS"}
+              </div>
+              {atkEloChange !== 0 && (
+                <div className={`mt-1 flex items-center justify-end gap-1 text-sm font-bold tabular-nums ${atkEloChange > 0 ? "text-success" : "text-destructive"}`}>
+                  {atkEloChange > 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                  {atkEloChange > 0 ? "+" : ""}{atkEloChange} ELO
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="p-6">
-              <Badge variant="outline" className="border-border text-[10px]">
-                Match #{match.match_number}
-              </Badge>
-              <h2 className="text-display mt-2 text-2xl font-extrabold">
-                {match.selected_map ?? "Voting"}
-              </h2>
-            </div>
-          );
-        })()}
-        <div className="flex flex-wrap items-center gap-3 border-t border-border px-6 py-3 text-[10px] uppercase tracking-wider text-muted-foreground">
-          <span>{match.region}</span>
-          <span>· {new Date(match.created_at).toLocaleString()}</span>
-        </div>
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 border-t border-border p-6">
-          <div
-            className={`text-right ${winner === "atk" ? "text-success" : "text-muted-foreground"}`}
-          >
-            <div className="text-[10px] uppercase tracking-wider">T</div>
-            <div className="text-display text-3xl font-extrabold">
-              {winner === "atk" ? "WIN" : "LOSS"}
+            <div className="text-display text-xl font-bold text-muted-foreground">VS</div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">CT</div>
+              <div className={`text-display text-3xl font-extrabold ${winner === "def" ? "text-success" : "text-muted-foreground"}`}>
+                {winner === "def" ? "WIN" : "LOSS"}
+              </div>
+              {defEloChange !== 0 && (
+                <div className={`mt-1 flex items-center gap-1 text-sm font-bold tabular-nums ${defEloChange > 0 ? "text-success" : "text-destructive"}`}>
+                  {defEloChange > 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                  {defEloChange > 0 ? "+" : ""}{defEloChange} ELO
+                </div>
+              )}
             </div>
           </div>
-          <div className="text-display text-xl font-bold text-muted-foreground">VS</div>
-          <div className={`${winner === "def" ? "text-success" : "text-muted-foreground"}`}>
-            <div className="text-[10px] uppercase tracking-wider">CT</div>
-            <div className="text-display text-3xl font-extrabold">
-              {winner === "def" ? "WIN" : "LOSS"}
-            </div>
-          </div>
-        </div>
-      </Card>
+        </Card>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <TeamCard
-          label="T"
-          players={match.atk_team}
-          hostId={match.host_id}
-          winner={winner}
-          teamSide="atk"
-          playerMap={playerMap}
-          eloChanges={eloChanges}
-        />
-        <TeamCard
-          label="CT"
-          players={match.def_team}
-          hostId={match.host_id}
-          winner={winner}
-          teamSide="def"
-          playerMap={playerMap}
-          eloChanges={eloChanges}
-        />
+        <div className="grid gap-5 lg:grid-cols-2">
+          <TeamCard
+            label="T"
+            players={match.atk_team}
+            hostId={match.host_id}
+            winner={winner}
+            teamSide="atk"
+            playerMap={playerMap}
+            eloChanges={eloChanges}
+          />
+          <TeamCard
+            label="CT"
+            players={match.def_team}
+            hostId={match.host_id}
+            winner={winner}
+            teamSide="def"
+            playerMap={playerMap}
+            eloChanges={eloChanges}
+          />
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
 
@@ -173,7 +197,7 @@ function TeamCard({
 
   return (
     <Card
-      className={`overflow-hidden border-border bg-card ${isWinner ? "ring-1 ring-success/40" : ""}`}
+      className={`card-faceit overflow-hidden border-border bg-card ${isWinner ? "ring-1 ring-success/40" : ""}`}
     >
       <div
         className={`flex items-center justify-between border-b px-4 py-3 ${
@@ -207,14 +231,14 @@ function TeamCard({
             key={id}
             to={p ? "/players/$username" : "#"}
             params={p ? { username: p.username ?? id } : {}}
-            className="flex items-center gap-3 border-b border-border/60 px-4 py-2.5 text-sm transition last:border-b-0 hover:bg-muted/30"
+            className="flex items-center gap-3 border-b border-border/40 px-4 py-3 transition-all duration-200 last:border-b-0 hover:bg-muted/30"
           >
-            <Avatar className="h-7 w-7 border border-border">
+            <Avatar className="h-8 w-8 border-2 border-border">
               <AvatarImage src={p ? avatarUrl(p) : ""} alt={name} />
-              <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
+              <AvatarFallback className="bg-muted text-xs">{name.slice(0, 2)}</AvatarFallback>
             </Avatar>
-            {id === hostId && <Crown className="h-3 w-3 shrink-0 text-primary" />}
-            <span className="min-w-0 flex-1 truncate font-medium">{name}</span>
+            {id === hostId && <Crown className="h-3.5 w-3.5 shrink-0 text-primary" />}
+            <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{name}</span>
             {change != null && (
               <span
                 className={`flex items-center gap-0.5 whitespace-nowrap text-xs font-bold tabular-nums ${

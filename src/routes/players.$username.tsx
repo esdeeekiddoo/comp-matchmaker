@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Percent } from "lucide-react";
+import { ArrowLeft, Percent, Zap, TrendingUp, TrendingDown, Trophy, Shield, Swords } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RankBadge } from "@/components/rank-badge";
 import { getPlayerByUsername, getEloHistory, avatarUrl } from "@/lib/supabase-queries";
+import { rankFromElo, RANK_COLORS, type Rank } from "@/lib/ranks";
 
 export const Route = createFileRoute("/players/$username")({
   loader: async ({ params }) => {
@@ -52,6 +53,34 @@ function PlayerPage() {
 
   const trendData = history.map((h, i) => ({ match: i + 1, elo: h.elo }));
 
+  const currentRank = rankFromElo(player.elo);
+  const rankColor = RANK_COLORS[currentRank];
+  const RANK_THRESHOLDS = [
+    { name: "Bronze I", min: 0 },
+    { name: "Bronze II", min: 200 },
+    { name: "Bronze III", min: 400 },
+    { name: "Silver I", min: 600 },
+    { name: "Silver II", min: 850 },
+    { name: "Silver III", min: 1100 },
+    { name: "Gold I", min: 1350 },
+    { name: "Gold II", min: 1650 },
+    { name: "Gold III", min: 1950 },
+    { name: "Platinum I", min: 2250 },
+    { name: "Platinum II", min: 2600 },
+    { name: "Platinum III", min: 2950 },
+    { name: "Dominator I", min: 4500 },
+    { name: "Dominator II", min: 5000 },
+    { name: "Sovereign I", min: 6000 },
+    { name: "Sovereign II", min: 6700 },
+    { name: "Master", min: 7400 },
+  ];
+  const currentRankIdx = RANK_THRESHOLDS.findIndex((r) => r.name === currentRank);
+  const nextRank = currentRankIdx < RANK_THRESHOLDS.length - 1 ? RANK_THRESHOLDS[currentRankIdx + 1] : null;
+  const prevRankMin = RANK_THRESHOLDS[currentRankIdx]?.min || 0;
+  const progress = nextRank
+    ? Math.min(100, ((player.elo - prevRankMin) / (nextRank.min - prevRankMin)) * 100)
+    : 100;
+
   return (
     <AppShell>
       <div className="space-y-6 p-4 lg:p-6">
@@ -66,34 +95,62 @@ function PlayerPage() {
           </Link>
         </Button>
 
-        <Card className="overflow-hidden border-border bg-card">
+        <Card className="card-faceit overflow-hidden border-border bg-card">
           <div className="relative h-32 bg-gradient-to-r from-primary/30 via-primary/10 to-background">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.12),transparent_60%)]" />
           </div>
           <div className="flex flex-wrap items-end gap-5 p-6 -mt-12">
             <Avatar className="h-24 w-24 border-4 border-card shadow-lg">
               <AvatarImage src={avatarUrl(player)} />
-              <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
+              <AvatarFallback className="bg-muted text-2xl">{name.slice(0, 2)}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <h1 className="text-display text-3xl font-extrabold">{name}</h1>
+              <h1 className="text-display text-3xl font-extrabold text-foreground">{name}</h1>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                 <RankBadge elo={player.elo} />
               </div>
             </div>
-            <Badge className="bg-primary/15 text-primary hover:bg-primary/20">Season 1</Badge>
+            <Badge className="bg-primary/15 text-primary hover:bg-primary/20 border-primary/20">Season 1</Badge>
           </div>
         </Card>
 
+        {/* Rank Progression Bar */}
+        {nextRank && (
+          <Card className="card-faceit border-border bg-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4" style={{ color: rankColor }} />
+                <span className="text-sm font-medium text-foreground">{currentRank}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Next:</span>
+                <span className="text-sm font-medium" style={{ color: RANK_COLORS[nextRank.name as Rank] }}>
+                  {nextRank.name}
+                </span>
+              </div>
+            </div>
+            <div className="relative h-3 w-full overflow-hidden rounded-full bg-muted/50">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+                style={{ width: `${progress}%`, background: rankColor }}
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+              <span>{player.elo} ELO</span>
+              <span>{nextRank.min - player.elo} ELO to go</span>
+            </div>
+          </Card>
+        )}
+
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatTile icon={Percent} label="Win Rate" value={`${winPct}%`} />
-          <StatTile label="Wins" value={`${player.wins}`} />
-          <StatTile label="Losses" value={`${player.losses}`} />
-          <StatTile label="ELO" value={`${player.elo}`} />
+          <StatTile icon={Percent} label="Win Rate" value={`${winPct}%`} color="text-success" bg="bg-success/10" />
+          <StatTile icon={Trophy} label="Wins" value={`${player.wins}`} color="text-primary" bg="bg-primary/10" />
+          <StatTile icon={Shield} label="Losses" value={`${player.losses}`} color="text-destructive" bg="bg-destructive/10" />
+          <StatTile icon={Zap} label="ELO" value={`${player.elo}`} color="text-chart-3" bg="bg-chart-3/10" />
         </div>
 
         {history.length > 0 && (
-          <Card className="border-border bg-card p-5">
+          <Card className="card-faceit border-border bg-card p-5">
             <div className="mb-3 flex items-center justify-between">
               <div className="section-title">ELO Trend</div>
               <span className="text-xs text-muted-foreground">Last {history.length} matches</span>
@@ -144,18 +201,26 @@ function StatTile({
   icon: Icon,
   label,
   value,
+  color = "text-primary",
+  bg = "bg-primary/10",
 }: {
   icon?: React.ComponentType<{ className?: string }>;
   label: string;
   value: string;
+  color?: string;
+  bg?: string;
 }) {
   return (
-    <Card className="border-border bg-card p-4">
-      <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground">
-        <span>{label}</span>
-        {Icon && <Icon className="h-3.5 w-3.5 text-primary" />}
+    <Card className="card-faceit border-border bg-card p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+        {Icon && (
+          <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${bg}`}>
+            <Icon className={`h-4 w-4 ${color}`} />
+          </div>
+        )}
       </div>
-      <div className="mt-1.5 text-display text-2xl font-bold tabular-nums">{value}</div>
+      <div className="mt-2 text-display text-2xl font-bold tabular-nums text-foreground">{value}</div>
     </Card>
   );
 }

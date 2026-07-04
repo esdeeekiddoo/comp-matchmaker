@@ -152,20 +152,70 @@
 }
 
 @utility faceit-glow {
-  box-shadow: 0 0 20px rgba(255, 85, 0, 0.08);
+  box-shadow: 0 0 30px rgba(255, 85, 0, 0.1);
 }
 
 @utility faceit-border-glow {
-  border-color: rgba(255, 85, 0, 0.3);
-  box-shadow: 0 0 15px rgba(255, 85, 0, 0.06);
+  border-color: rgba(255, 85, 0, 0.4);
+  box-shadow: 0 0 20px rgba(255, 85, 0, 0.08);
 }
 
 .card-faceit {
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card-faceit:hover {
-  border-color: rgba(255, 85, 0, 0.25) !important;
-  box-shadow: 0 0 24px rgba(255, 85, 0, 0.12), 0 0 8px rgba(255, 85, 0, 0.06);
+  border-color: rgba(255, 85, 0, 0.3) !important;
+  box-shadow: 0 0 30px rgba(255, 85, 0, 0.15), 0 0 10px rgba(255, 85, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-muted);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-foreground);
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(255, 85, 0, 0.3);
+  color: var(--color-foreground);
+}
+
+/* Loading bar animation */
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+.animate-loading-bar {
+  animation: loading-bar 1.5s ease-in-out infinite;
 }
 
 

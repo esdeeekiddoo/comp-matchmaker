@@ -7,12 +7,38 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import favicon from "../assets/APL.jpg";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
+
+function RouteLoadingIndicator() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const unsubBefore = router.subscribe("onBeforeNavigate", () => {
+      setIsLoading(true);
+    });
+    const unsubLoaded = router.subscribe("onResolved", () => {
+      setTimeout(() => setIsLoading(false), 300);
+    });
+    return () => {
+      unsubBefore();
+      unsubLoaded();
+    };
+  }, [router]);
+
+  if (!isLoading) return null;
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[100] h-0.5">
+      <div className="h-full bg-primary animate-loading-bar" />
+    </div>
+  );
+}
 
 function NotFoundComponent() {
   return (
@@ -129,6 +155,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <RouteLoadingIndicator />
       <Outlet />
       <Toaster />
     </QueryClientProvider>

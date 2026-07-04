@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Trophy, Swords, Users, ListOrdered, User } from "lucide-react";
+import { Home, Trophy, Swords, Users, ListOrdered, User, Zap } from "lucide-react";
 import caplLogo from "@/assets/APL.jpg";
 import { getGuildInfo } from "@/lib/guild-info";
 import {
@@ -19,7 +19,7 @@ import {
 const primary = [
   { title: "Home", url: "/", icon: Home, exact: true },
   { title: "Profile", url: "/profile", icon: User },
-  { title: "Queue", url: "/queue", icon: ListOrdered },
+  { title: "Queue", url: "/queue", icon: ListOrdered, accent: true },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
   { title: "Matches", url: "/matches", icon: Swords },
 ];
@@ -39,12 +39,12 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-border/40">
       <SidebarHeader className="px-3 py-4">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center">
-            <img src={caplLogo} alt="APL" className="h-7 w-7" />
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 border border-primary/20 transition-all group-hover:bg-primary/20">
+            <img src={caplLogo} alt="APL" className="h-6 w-6" />
           </div>
           <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
-            <span className="text-display text-sm font-extrabold uppercase tracking-wider">
+            <span className="text-display text-sm font-extrabold uppercase tracking-wider text-foreground">
               APL
             </span>
             <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -64,9 +64,18 @@ export function AppSidebar() {
                     asChild
                     isActive={isActive(item.url, item.exact)}
                     tooltip={item.title}
+                    className={`transition-all duration-200 ${
+                      item.accent && isActive(item.url, item.exact)
+                        ? "bg-primary/10 text-primary"
+                        : ""
+                    }`}
                   >
                     <Link to={item.url}>
-                      <item.icon />
+                      {item.accent ? (
+                        <Zap className={isActive(item.url, item.exact) ? "text-primary" : ""} />
+                      ) : (
+                        <item.icon />
+                      )}
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -78,9 +87,11 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="px-3 py-3 text-[10px] uppercase tracking-wider text-muted-foreground group-data-[collapsible=icon]:hidden">
-        <div className="flex items-center gap-2">
-          <Users className="h-3 w-3 text-success" />
-          <span>{online !== null ? `${online.toLocaleString()} online` : "—"}</span>
+        <div className="flex items-center gap-2 rounded-lg bg-success/5 px-2 py-1.5 border border-success/10">
+          <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+          <span className="text-success font-medium">
+            {online !== null ? `${online.toLocaleString()} online` : "—"}
+          </span>
         </div>
       </SidebarFooter>
     </Sidebar>
