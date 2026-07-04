@@ -116,15 +116,10 @@ function QueuePage() {
     try {
       const match = await getActiveMatchForUser(session.user_id, guildId);
       if (match) {
-        if (match.selected_map) {
-          setActiveMatch(null);
-          setMatchPlayers([]);
-        } else {
-          setActiveMatch(match);
-          const allIds = [...new Set([...match.atk_team, ...match.def_team])];
-          const rows = await getPlayersByIds(allIds);
-          setMatchPlayers(rows.map((r) => ({ user_id: r.discord_id, username: r.username || "Unknown", avatar_url: r.avatar_url || "" })));
-        }
+        setActiveMatch(match);
+        const allIds = [...new Set([...match.atk_team, ...match.def_team])];
+        const rows = await getPlayersByIds(allIds);
+        setMatchPlayers(rows.map((r) => ({ user_id: r.discord_id, username: r.username || "Unknown", avatar_url: r.avatar_url || "" })));
       } else {
         setActiveMatch(null);
         setMatchPlayers([]);
