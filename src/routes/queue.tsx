@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { avatarUrl, getActiveMatchForUser, getPlayersByIds } from "@/lib/supabase-queries";
 import { BanOverlay } from "@/components/ban-overlay";
 import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
+import heroImg from "@/assets/APL.jpg";
 
 type QueuePlayer = {
   user_id: string;
@@ -190,7 +191,7 @@ function QueuePage() {
         playTone(1100, 0.15, 0.2);
       } catch {}
       if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-        new Notification("Match Found!", { body: "Your match is ready. Check the queue page.", icon: "/APL.jpg" });
+        new Notification("Match Found!", { body: "Your match is ready. Check the queue page.", icon: heroImg });
       }
     }
     prevMatchRef.current = activeMatch;

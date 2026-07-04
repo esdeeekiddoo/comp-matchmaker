@@ -251,6 +251,8 @@ function ProfilePage() {
             {matches.length > 0 ? (
               matches.map((m) => {
                 const mapImg = getMapImage(m.selected_map);
+                const eloChanges = (m.elo_changes as Record<string, number>) ?? {};
+                const myEloChange = eloChanges[session!.user_id] ?? 0;
                 return (
                   <Link
                     key={m.id}
@@ -277,12 +279,12 @@ function ProfilePage() {
                           <div className="flex items-center gap-3">
                             <Badge
                               className={`w-16 justify-center ${
-                                m.winner === "atk"
+                                myEloChange >= 0
                                   ? "bg-success/20 text-success border-success/30"
                                   : "bg-destructive/20 text-destructive border-destructive/30"
                               }`}
                             >
-                              {m.winner === "atk" ? "WIN" : "LOSS"}
+                              {myEloChange >= 0 ? "WIN" : "LOSS"}
                             </Badge>
                             <div>
                               <div className="text-sm font-medium text-foreground">{m.selected_map || "Unknown"}</div>
@@ -293,10 +295,10 @@ function ProfilePage() {
                           </div>
                           <div className="text-right">
                             <div className={`text-sm font-semibold ${
-                              m.winner === "atk" ? "text-success" : "text-destructive"
+                              myEloChange >= 0 ? "text-success" : "text-destructive"
                             }`}>
-                              {m.winner === "atk" ? "+" : "-"}
-                              {Math.abs(m.elo_change || 0)} ELO
+                              {myEloChange >= 0 ? "+" : ""}
+                              {myEloChange} ELO
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {new Date(m.created_at).toLocaleDateString()}
