@@ -42,7 +42,11 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
   const [bans, setBans] = useState<string[]>(match.bans || []);
   const [selectedMap, setSelectedMap] = useState<string | null>(match.selected_map);
   const [banning, setBanning] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(-1);
+  const [timeLeft, setTimeLeft] = useState<number>(() => {
+    if (!match.ban_deadline) return 0;
+    const deadline = new Date(match.ban_deadline).getTime();
+    return Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+  });
 
   const userIsBanner = match.banners?.atk === session.user_id || match.banners?.def === session.user_id;
   const isAtkBanner = match.banners?.atk === session.user_id;
@@ -74,7 +78,7 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
   }, [match.bans]);
 
   useEffect(() => {
-    if (selectedMap || timeLeft > 0) return;
+    if (selectedMap || timeLeft > 0 || !match.ban_deadline) return;
     console.log("[ban-overlay] timeLeft=0, starting auto-pick polling");
     const interval = setInterval(async () => {
       try {
@@ -95,13 +99,17 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
             clearInterval(interval);
             setTimeout(onMapSelected, 2000);
           }
+        } else if (data.error === "Map already selected") {
+          clearInterval(interval);
+          setSelectedMap(match.selected_map);
+          setTimeout(onMapSelected, 2000);
         }
       } catch (err) {
         console.error("[ban-overlay] auto-pick error:", err);
       }
     }, 2000);
     return () => clearInterval(interval);
-  }, [timeLeft, selectedMap]);
+  }, [timeLeft, selectedMap, match.ban_deadline]);
 
   const handleBan = useCallback(async (mapName: string) => {
     if (!canBan || banning) return;
