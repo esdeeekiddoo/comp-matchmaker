@@ -5,9 +5,7 @@ import {
   MessageCircle,
   Trophy,
   Swords,
-  Users,
   Flame,
-  Headphones,
   Map,
   ExternalLink,
 } from "lucide-react";
@@ -27,7 +25,7 @@ export const Route = createFileRoute("/")({
     const guildId = typeof window !== "undefined" ? getActiveGuildId(parseSession()) : undefined;
     const [all, recent] = await Promise.all([getPlayers(guildId), getRecentMatches(5, guildId)]);
     const top = all.slice(0, 6);
-    return { top, recent, total: all.length };
+    return { top, recent };
   },
   head: () => ({
     meta: [
@@ -41,7 +39,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { top, recent, total } = Route.useLoaderData();
+  const { top, recent } = Route.useLoaderData();
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
@@ -53,7 +51,6 @@ function Home() {
       <div className="grid gap-6 p-4 lg:grid-cols-[1fr_320px] lg:p-6">
         <div className="space-y-6 min-w-0">
           <Hero session={session} />
-          <LiveStats total={total} />
           {recent.length > 0 && <RecentMatches matches={recent} />}
         </div>
         <aside className="space-y-6">
@@ -124,31 +121,6 @@ function Hero({
   );
 }
 
-function LiveStats({ total }: { total: number }) {
-  const stats = [
-    { label: "Tracked Players", value: total, icon: Users, color: "text-success", bg: "bg-success/10" },
-    { label: "Seasons", value: "1", icon: Trophy, color: "text-chart-3", bg: "bg-chart-3/10" },
-    { label: "Status", value: "Live", icon: Flame, color: "text-warning", bg: "bg-warning/10" },
-    { label: "Queue", value: "Web", icon: Headphones, color: "text-primary", bg: "bg-primary/10" },
-  ];
-  return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      {stats.map((s) => (
-        <Card key={s.label} className="card-faceit border-border/60 bg-card p-4 transition-all duration-200 hover:border-border">
-          <div className="flex items-center justify-between">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${s.bg}`}>
-              <s.icon className={`h-5 w-5 ${s.color}`} />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-display text-2xl font-bold text-foreground">{s.value}</div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">{s.label}</div>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-}
 
 
 function RecentMatches({ matches }: { matches: Awaited<ReturnType<typeof getRecentMatches>> }) {
