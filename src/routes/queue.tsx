@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { avatarUrl, getActiveMatchForUser, getPlayersByIds } from "@/lib/supabase-queries";
 import { BanOverlay } from "@/components/ban-overlay";
 import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
-import heroImg from "@/assets/APL.jpg";
+import heroImg from "@/assets/APL.png";
 
 type QueuePlayer = {
   user_id: string;

@@ -18,7 +18,7 @@ import { RankBadge } from "@/components/rank-badge";
 import { getPlayers, getRecentMatches, avatarUrl } from "@/lib/supabase-queries";
 import { getMapImage } from "@/lib/maps";
 import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
-import hero from "@/assets/APL.jpg";
+import hero from "@/assets/APL.png";
 
 export const Route = createFileRoute("/")({
   loader: async () => {

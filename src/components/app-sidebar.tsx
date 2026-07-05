@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Trophy, Swords, Users, ListOrdered, User, Zap } from "lucide-react";
-import caplLogo from "@/assets/APL.jpg";
+import caplLogo from "@/assets/APL.png";
 import { getGuildInfo } from "@/lib/guild-info";
 import {
   Sidebar,
