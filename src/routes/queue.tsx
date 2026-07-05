@@ -79,6 +79,7 @@ function QueuePage() {
   const [banCountdown, setBanCountdown] = useState("");
   const audioCtxRef = useRef<AudioContext | null>(null);
   const prevMatchRef = useRef<any>(null);
+  const notifiedInviteIds = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     setSession(parseSession());
@@ -200,6 +201,39 @@ function QueuePage() {
     }
     prevMatchRef.current = activeMatch;
   }, [activeMatch]);
+
+  // Party invite notification + audio
+  useEffect(() => {
+    for (const invite of pendingInvites) {
+      if (!notifiedInviteIds.current.has(invite.id)) {
+        notifiedInviteIds.current.add(invite.id);
+        try {
+          const ctx = audioCtxRef.current || new AudioContext();
+          audioCtxRef.current = ctx;
+          if (ctx.state === "suspended") ctx.resume();
+          function playTone(freq: number, start: number, duration: number) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.3, ctx.currentTime + start);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(ctx.currentTime + start);
+            osc.stop(ctx.currentTime + start + duration);
+          }
+          playTone(660, 0, 0.12);
+          playTone(880, 0.12, 0.2);
+        } catch {}
+        if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+          new Notification("Party Invite!", {
+            body: `${invite.from_username} invited you to a party!`,
+            icon: heroImg,
+          });
+        }
+      }
+    }
+  }, [pendingInvites]);
 
   useEffect(() => {
     fetchQueue();
