@@ -70,24 +70,24 @@ function Leaderboard() {
               Live standings · Updated every match
             </p>
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search player"
-              className="h-9 w-52 border-border bg-muted pl-9"
+              className="h-9 w-full sm:w-52 border-border bg-muted pl-9"
             />
           </div>
         </div>
 
         {/* Tab Bar */}
-        <div className="flex gap-3">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-200 ${
+          <div className="flex gap-2 sm:gap-3 flex-wrap">
+            {tabs.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`rounded-full px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-all duration-200 ${
                 tab === t.key
                   ? "bg-primary text-[#0b0d0b] shadow-[0_0_22px_rgba(255,85,0,0.45)] border border-primary"
                   : "border border-[rgba(255,85,0,0.35)] bg-surface text-muted-foreground shadow-[0_0_16px_rgba(255,85,0,0.25)] hover:border-[rgba(255,85,0,0.7)] hover:shadow-[0_0_22px_rgba(255,85,0,0.45)] hover:text-foreground"
@@ -120,7 +120,7 @@ function AllTimeTable({ rows }: { rows: PlayerRow[]; q: string }) {
     <Card className="overflow-hidden border-border/60 bg-card">
       <div className="overflow-x-auto">
         <div className="min-w-[500px]">
-          <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-[60px_minmax(0,1fr)_70px_60px_60px sm:grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-2 sm:px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             <span>Rank</span>
             <span>Player</span>
             <span className="text-right">ELO</span>
@@ -138,7 +138,7 @@ function AllTimeTable({ rows }: { rows: PlayerRow[]; q: string }) {
                   key={p.discord_id}
                   to="/players/$username"
                   params={{ username: name }}
-                  className={`grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/40 px-4 py-3.5 transition-all duration-200 last:border-b-0 hover:bg-muted/30 ${
+                  className={`grid grid-cols-[60px_minmax(0,1fr)_70px_60px_60px sm:grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-1.5 sm:gap-3 border-b border-border/40 px-2 sm:px-4 py-2.5 sm:py-3.5 transition-all duration-200 last:border-b-0 hover:bg-muted/30 ${
                     i % 2 === 1 ? "bg-muted/10" : ""
                   } ${isTop3 ? "bg-primary/5 hover:bg-primary/10" : ""}`}
                 >
@@ -191,7 +191,7 @@ function PeriodTable({ rows }: { rows: PeriodPlayerRow[]; q: string }) {
     <Card className="overflow-hidden border-border/60 bg-card">
       <div className="overflow-x-auto">
         <div className="min-w-[500px]">
-          <div className="grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-[60px_minmax(0,1fr)_70px_60px_60px sm:grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/60 bg-muted/30 px-2 sm:px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             <span>Rank</span>
             <span>Player</span>
             <span className="text-right">+/- ELO</span>
@@ -210,7 +210,7 @@ function PeriodTable({ rows }: { rows: PeriodPlayerRow[]; q: string }) {
                   key={p.discord_id}
                   to="/players/$username"
                   params={{ username: name }}
-                  className={`grid grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-3 border-b border-border/40 px-4 py-3.5 transition-all duration-200 last:border-b-0 hover:bg-muted/30 ${
+                  className={`grid grid-cols-[60px_minmax(0,1fr)_70px_60px_60px sm:grid-cols-[60px_minmax(0,1fr)_90px_80px_80px] items-center gap-1.5 sm:gap-3 border-b border-border/40 px-2 sm:px-4 py-2.5 sm:py-3.5 transition-all duration-200 last:border-b-0 hover:bg-muted/30 ${
                     i % 2 === 1 ? "bg-muted/10" : ""
                   } ${isTop3 ? "bg-primary/5 hover:bg-primary/10" : ""}`}
                 >
