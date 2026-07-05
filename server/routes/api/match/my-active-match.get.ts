@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const res = await fetch(
-      `${url}/rest/v1/matches?select=id,match_number,region,atk_team,def_team,selected_map,status,bans,banners,ban_deadline,created_at&status=eq.active&guild_id=eq.${guildId}`,
+      `${url}/rest/v1/matches?select=id,match_number,region,atk_team,def_team,selected_map,status,bans,banners,ban_deadline,created_at&status=eq.active&selected_map=is.null&guild_id=eq.${guildId}`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` } },
     );
     const matches = await res.json();
