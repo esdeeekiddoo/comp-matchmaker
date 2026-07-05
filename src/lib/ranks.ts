@@ -11,6 +11,9 @@ export type Rank =
   | "Platinum I"
   | "Platinum II"
   | "Platinum III"
+  | "Diamond I"
+  | "Diamond II"
+  | "Diamond III"
   | "Dominator I"
   | "Dominator II"
   | "Sovereign I"
@@ -30,6 +33,9 @@ export const RANK_COLORS: Record<Rank, string> = {
   "Platinum I": "#14b8a6",
   "Platinum II": "#0d9488",
   "Platinum III": "#0f766e",
+  "Diamond I": "#06b6d4",
+  "Diamond II": "#0891b2",
+  "Diamond III": "#0e7490",
   "Dominator I": "#8b5cf6",
   "Dominator II": "#7c3aed",
   "Sovereign I": "#ef4444",
@@ -43,6 +49,9 @@ export function rankFromElo(elo: number): Rank {
   if (elo >= 6000) return "Sovereign I";
   if (elo >= 5000) return "Dominator II";
   if (elo >= 4500) return "Dominator I";
+  if (elo >= 4300) return "Diamond III";
+  if (elo >= 3850) return "Diamond II";
+  if (elo >= 3400) return "Diamond I";
   if (elo >= 2950) return "Platinum III";
   if (elo >= 2600) return "Platinum II";
   if (elo >= 2250) return "Platinum I";
