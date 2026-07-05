@@ -16,6 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { parseSession, getActiveGuildId, setActiveGuildId, type Session } from "@/lib/session";
+import counterbloxIcon from "@/assets/CAPL (2).png";
+import bloxstrikeIcon from "@/assets/BAPL.png";
+
+const GUILD_ICONS: Record<string, string> = {
+  "1484564086074380311": counterbloxIcon,
+  "1522610593465368737": bloxstrikeIcon,
+};
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -53,7 +60,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <SelectContent>
                   {session.guild_ids.map((g) => (
                     <SelectItem key={g.id} value={g.id} className="text-xs">
-                      {g.game_name ?? g.name}
+                      <span className="flex items-center gap-2">
+                        {GUILD_ICONS[g.id] && (
+                          <img src={GUILD_ICONS[g.id]} alt="" className="h-4 w-4 rounded-sm object-cover" />
+                        )}
+                        {g.game_name ?? g.name}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
