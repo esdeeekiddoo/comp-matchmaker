@@ -14,7 +14,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  Swords, Users, LogIn, Loader2, Clock, Target,
+  Users, LogIn, Loader2, Clock,
   UserPlus, UserMinus, UserCheck, X, PartyPopper,
   Shield, Zap, Timer, TrendingUp,
 } from "lucide-react";
@@ -24,6 +24,8 @@ import { avatarUrl, getActiveMatchForUser, getPlayersByIds } from "@/lib/supabas
 import { BanOverlay } from "@/components/ban-overlay";
 import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
 import heroImg from "@/assets/APL.png";
+import queueIcon from "@/assets/Queue.png";
+import statusIcon from "@/assets/Status.png";
 
 type QueuePlayer = {
   user_id: string;
@@ -406,7 +408,7 @@ function QueuePage() {
         >
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20">
-              <Swords className="h-7 w-7 text-primary" />
+              <img src={queueIcon} alt="Queue" className="h-7 w-7 object-contain" />
             </div>
             <div>
               <h1 className="text-display text-2xl font-bold text-foreground">Matchmaking Queue</h1>
@@ -646,7 +648,7 @@ function QueuePage() {
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Target className="h-5 w-5 text-primary" />
+                <img src={statusIcon} alt="Status" className="h-5 w-5 object-contain" />
               </div>
               <div>
                 <h2 className="font-semibold text-foreground">Queue Status</h2>

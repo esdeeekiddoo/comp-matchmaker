@@ -102,7 +102,15 @@ export async function getPlayersByIds(ids: string[]): Promise<PlayerRow[]> {
     .from("players")
     .select("discord_id, username, avatar_url, elo, wins, losses")
     .in("discord_id", ids);
-  return (data ?? []) as PlayerRow[];
+  const found = (data ?? []) as PlayerRow[];
+  // Fill in any missing IDs with placeholder entries
+  const foundIds = new Set(found.map(r => r.discord_id));
+  for (const id of ids) {
+    if (!foundIds.has(id)) {
+      found.push({ discord_id: id, username: null, avatar_url: null, elo: 0, wins: 0, losses: 0 });
+    }
+  }
+  return found;
 }
 
 export type PeriodPlayerRow = PlayerRow & {
@@ -229,7 +237,15 @@ export async function getActiveMatchForUser(userId: string, guildId?: string): P
   if (guildId) query = query.eq("guild_id", guildId);
   const { data } = await query;
   if (!data || data.length === 0) return null;
-  return data[0] as BanMatchRow | null;
+  const match = data[0] as any;
+  // Parse banners if stored as TEXT (JSON string) instead of JSONB
+  if (typeof match.banners === "string") {
+    try { match.banners = JSON.parse(match.banners); } catch { match.banners = {}; }
+  }
+  if (typeof match.bans === "string") {
+    try { match.bans = JSON.parse(match.bans); } catch { match.bans = []; }
+  }
+  return match as BanMatchRow | null;
 }
 
 export async function submitBan(matchId: string, userId: string, mapName: string) {
