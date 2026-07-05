@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useState, useEffect } from "react";
-import { Bell, Search, MessageCircle, LogOut, Gamepad2 } from "lucide-react";
+import { Bell, Search, MessageCircle, LogOut } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { avatarUrl } from "@/lib/supabase-queries";
@@ -54,7 +54,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             {session && session.guild_ids?.length > 1 && (
               <Select value={activeGuild} onValueChange={handleGuildChange}>
                 <SelectTrigger className="h-8 w-[140px] shrink-0 border-border bg-muted text-xs sm:w-[160px]">
-                  <Gamepad2 className="mr-1 h-3.5 w-3.5 shrink-0 text-primary" />
                   <SelectValue placeholder="Select game" />
                 </SelectTrigger>
                 <SelectContent>
