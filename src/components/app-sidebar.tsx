@@ -40,9 +40,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border/40">
       <SidebarHeader className="px-3 py-4">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 border border-primary/20 transition-all group-hover:bg-primary/20">
-            <img src={caplLogo} alt="APL" className="h-6 w-6" />
-          </div>
+          <img src={caplLogo} alt="APL" className="h-10 w-10 object-contain" />
           <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
             <span className="text-display text-sm font-extrabold uppercase tracking-wider text-foreground">
               APL
