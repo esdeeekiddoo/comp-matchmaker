@@ -407,9 +407,7 @@ function QueuePage() {
           className="flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20">
-              <img src={queueIcon} alt="Queue" className="h-7 w-7 object-contain" />
-            </div>
+            <img src={queueIcon} alt="Queue" className="h-14 w-14 object-contain" />
             <div>
               <h1 className="text-display text-2xl font-bold text-foreground">Matchmaking Queue</h1>
               <p className="text-sm text-muted-foreground">Join the queue and get matched</p>
@@ -647,9 +645,7 @@ function QueuePage() {
         <Card className="card-faceit border-border/60 bg-gradient-to-br from-card to-card/80 p-6">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <img src={statusIcon} alt="Status" className="h-5 w-5 object-contain" />
-              </div>
+              <img src={statusIcon} alt="Status" className="h-10 w-10 object-contain" />
               <div>
                 <h2 className="font-semibold text-foreground">Queue Status</h2>
                 <p className="text-xs text-muted-foreground">Ready to play</p>
