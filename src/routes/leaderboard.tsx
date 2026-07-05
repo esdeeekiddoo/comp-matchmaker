@@ -4,6 +4,7 @@ import { Trophy, Search, TrendingUp, Flame } from "lucide-react";
 import N1 from "@/assets/N1.png";
 import N2 from "@/assets/N2.png";
 import N3 from "@/assets/N3.png";
+import leaderboardIcon from "@/assets/Leaderboard.png";
 import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -62,7 +63,7 @@ function Leaderboard() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="section-title flex items-center gap-2">
-              <Trophy className="h-3.5 w-3.5" /> Leaderboard
+              <img src={leaderboardIcon} alt="" className="h-5 w-5 object-contain" /> Leaderboard
             </div>
             <h1 className="text-display mt-1 text-3xl font-bold">Season 1 Ladder</h1>
             <p className="text-sm text-muted-foreground">
@@ -81,15 +82,15 @@ function Leaderboard() {
         </div>
 
         {/* Tab Bar */}
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-200 ${
                 tab === t.key
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                  : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-primary text-[#0b0d0b] shadow-[0_0_22px_rgba(255,85,0,0.45)] border border-primary"
+                  : "border border-[rgba(255,85,0,0.35)] bg-surface text-muted-foreground shadow-[0_0_16px_rgba(255,85,0,0.25)] hover:border-[rgba(255,85,0,0.7)] hover:shadow-[0_0_22px_rgba(255,85,0,0.45)] hover:text-foreground"
               }`}
             >
               {t.key === "week" || t.key === "month" ? (
