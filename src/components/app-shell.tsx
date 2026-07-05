@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const GUILD_ICONS: Record<string, string> = {
   "1484564086074380311": counterbloxIcon,
@@ -67,6 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
+    <TooltipProvider>
     <div className="min-h-screen bg-background">
       <BackgroundEffects />
 
@@ -233,5 +235,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Page Content */}
       <main className="relative z-10">{children}</main>
     </div>
+    </TooltipProvider>
   );
 }
