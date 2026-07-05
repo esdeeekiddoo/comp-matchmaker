@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
   try {
     console.log(`[ban] request: userId=${userId}, matchId=${matchId}, mapName=${mapName}`);
     const matchRes = await fetch(
-      `${url}/rest/v1/matches?id=eq.${matchId}&select=bans,banners,selected_map,atk_team,def_team,host_chat_channel_id,match_number,region`,
+      `${url}/rest/v1/matches?id=eq.${matchId}&select=bans,banners,selected_map,atk_team,def_team,host_chat_channel_id,match_number,region,ban_deadline`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` } },
     );
     const matches = await matchRes.json();
@@ -64,12 +64,26 @@ export default defineEventHandler(async (event) => {
       setResponseStatus(event, 404);
       return { ok: false, error: "Match not found" };
     }
+    console.log(`[ban] match data: banners=${JSON.stringify(match.banners)}, bans=${JSON.stringify(match.bans)}, selected_map=${match.selected_map}, ban_deadline=${match.ban_deadline}`);
+
     if (match.selected_map) {
       return { ok: false, error: "Map already selected" };
     }
 
-    const currentBans: string[] = match.bans || [];
-    const banners = match.banners || {};
+    let currentBans: string[] = [];
+    if (Array.isArray(match.bans)) {
+      currentBans = match.bans;
+    } else if (typeof match.bans === "string") {
+      try { currentBans = JSON.parse(match.bans); } catch { currentBans = []; }
+    }
+    let banners: Record<string, string> = {};
+    if (match.banners && typeof match.banners === "object" && !Array.isArray(match.banners)) {
+      banners = match.banners;
+    } else if (typeof match.banners === "string") {
+      try { banners = JSON.parse(match.banners); } catch { banners = {}; }
+    }
+
+    console.log(`[ban] parsed: currentBans=${JSON.stringify(currentBans)}, banners=${JSON.stringify(banners)}`);
 
     if (currentBans.includes(mapName)) {
       return { ok: false, error: "Map already banned" };
@@ -98,8 +112,19 @@ export default defineEventHandler(async (event) => {
     const remaining = MAPS.filter((m) => !newBans.includes(m));
 
     let selectedMap: string | null = null;
-    if (mapName === "__auto__" && remaining.length > 0) {
-      selectedMap = remaining[Math.floor(Math.random() * remaining.length)];
+    if (mapName === "__auto__") {
+      if (!match.ban_deadline) {
+        console.log("[ban] __auto__ rejected: ban_deadline is null");
+        return { ok: false, error: "Ban deadline not set" };
+      }
+      const deadlineMs = new Date(match.ban_deadline).getTime();
+      if (isNaN(deadlineMs) || Date.now() < deadlineMs) {
+        console.log("[ban] __auto__ rejected: deadline not yet reached");
+        return { ok: false, error: "Ban timer has not expired yet" };
+      }
+      if (remaining.length > 0) {
+        selectedMap = remaining[Math.floor(Math.random() * remaining.length)];
+      }
     } else if (newBans.length >= 4 && remaining.length > 0) {
       selectedMap = remaining[Math.floor(Math.random() * remaining.length)];
     }

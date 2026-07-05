@@ -59,8 +59,34 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
   const myTurn = atkTurn ? isAtkBanner : !isAtkBanner;
   const canBan = userIsBanner && myBanCount < 2 && myTurn && !selectedMap;
 
+  console.log("[ban-overlay] state:", {
+    userId: session.user_id,
+    banners: match.banners,
+    userIsBanner,
+    isAtkBanner,
+    myTeam,
+    bans,
+    atkTurn,
+    myTurn,
+    myBanCount,
+    canBan,
+    selectedMap,
+    timeLeft,
+    ban_deadline: match.ban_deadline,
+  });
+
   useEffect(() => {
+    if (!match.ban_deadline) {
+      console.warn("[ban-overlay] ban_deadline is null/undefined — timer will not start");
+      setTimeLeft(0);
+      return;
+    }
     const deadline = new Date(match.ban_deadline).getTime();
+    if (isNaN(deadline)) {
+      console.warn("[ban-overlay] ban_deadline produced NaN:", match.ban_deadline);
+      setTimeLeft(0);
+      return;
+    }
     const update = () => setTimeLeft(Math.max(0, Math.floor((deadline - Date.now()) / 1000)));
     update();
     const interval = setInterval(update, 500);
