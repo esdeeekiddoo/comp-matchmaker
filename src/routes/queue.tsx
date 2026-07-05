@@ -16,8 +16,9 @@ import {
 import {
   Swords, Users, LogIn, Loader2, Clock, Target,
   UserPlus, UserMinus, UserCheck, X, PartyPopper,
-  Shield, Zap, Timer,
+  Shield, Zap, Timer, TrendingUp,
 } from "lucide-react";
+import { rankFromElo, RANK_COLORS, type Rank } from "@/lib/ranks";
 import { toast } from "sonner";
 import { avatarUrl, getActiveMatchForUser, getPlayersByIds } from "@/lib/supabase-queries";
 import { BanOverlay } from "@/components/ban-overlay";
@@ -29,6 +30,7 @@ type QueuePlayer = {
   username: string;
   avatar_url: string;
   joined_at: string;
+  elo: number;
 };
 
 type Party = {
@@ -781,9 +783,23 @@ function QueuePage() {
                           </Badge>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        Joined {getTimeInQueue(p.joined_at)} ago
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span
+                          className="text-[11px] font-semibold"
+                          style={{ color: RANK_COLORS[rankFromElo(p.elo)] }}
+                        >
+                          {rankFromElo(p.elo)}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">·</span>
+                        <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
+                          <TrendingUp className="h-3 w-3" />
+                          {p.elo}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">·</span>
+                        <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {getTimeInQueue(p.joined_at)}
+                        </span>
                       </div>
                     </div>
                   </div>

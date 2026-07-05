@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { Trophy, Search, TrendingUp, Flame, Crown, Medal } from "lucide-react";
+import { Trophy, Search, TrendingUp, Flame } from "lucide-react";
+import N1 from "@/assets/N1.png";
+import N2 from "@/assets/N2.png";
+import N3 from "@/assets/N3.png";
 import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -141,11 +144,11 @@ function AllTimeTable({ rows }: { rows: PlayerRow[]; q: string }) {
                   <div className="flex items-center gap-1.5">
                     {isTop3 ? (
                       <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${
-                        i === 0 ? "bg-yellow-500/20 text-yellow-500" :
-                        i === 1 ? "bg-slate-300/20 text-slate-300" :
-                        "bg-amber-600/20 text-amber-600"
+                        i === 0 ? "bg-yellow-500/20" :
+                        i === 1 ? "bg-slate-300/20" :
+                        "bg-amber-600/20"
                       }`}>
-                        {i === 0 ? <Crown className="h-4 w-4" /> : <Medal className="h-4 w-4" />}
+                        <img src={i === 0 ? N1 : i === 1 ? N2 : N3} className="h-7 w-7 object-contain" alt={`#${i + 1}`} />
                       </div>
                     ) : (
                       <span className="font-display text-sm font-bold text-muted-foreground">
@@ -215,11 +218,11 @@ function PeriodTable({ rows }: { rows: PeriodPlayerRow[]; q: string }) {
                   <div className="flex items-center gap-1.5">
                     {isTop3 ? (
                       <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${
-                        i === 0 ? "bg-yellow-500/20 text-yellow-500" :
-                        i === 1 ? "bg-slate-300/20 text-slate-300" :
-                        "bg-amber-600/20 text-amber-600"
+                        i === 0 ? "bg-yellow-500/20" :
+                        i === 1 ? "bg-slate-300/20" :
+                        "bg-amber-600/20"
                       }`}>
-                        {i === 0 ? <Crown className="h-4 w-4" /> : <Medal className="h-4 w-4" />}
+                        <img src={i === 0 ? N1 : i === 1 ? N2 : N3} className="h-7 w-7 object-contain" alt={`#${i + 1}`} />
                       </div>
                     ) : (
                       <span className="font-display text-sm font-bold text-muted-foreground">

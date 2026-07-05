@@ -15,7 +15,24 @@ export default defineEventHandler(async (event) => {
       { headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" } },
     );
     const rows = await res.json();
-    return { players: Array.isArray(rows) ? rows : [] };
+    if (!Array.isArray(rows) || rows.length === 0) return { players: [] };
+
+    const userIds = rows.map((r: any) => r.user_id);
+    const eloRes = await fetch(
+      `${url}/rest/v1/guild_players?guild_id=eq.${guildId}&discord_id=in.(${userIds.join(",")})&select=discord_id,elo`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" } },
+    );
+    const eloRows = await eloRes.json();
+    const eloMap: Record<string, number> = {};
+    if (Array.isArray(eloRows)) {
+      for (const e of eloRows) eloMap[e.discord_id] = e.elo;
+    }
+
+    const players = rows.map((r: any) => ({
+      ...r,
+      elo: eloMap[r.user_id] ?? 0,
+    }));
+    return { players };
   } catch {
     return { players: [] };
   }
