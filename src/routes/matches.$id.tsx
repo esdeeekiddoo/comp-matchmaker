@@ -62,8 +62,8 @@ function MatchPage() {
           size="sm"
           className="gap-1 text-muted-foreground hover:text-foreground"
         >
-          <Link to="/matches">
-            <ArrowLeft className="h-4 w-4" /> Back to matches
+          <Link to="/profile">
+            <ArrowLeft className="h-4 w-4" /> Back to profile
           </Link>
         </Button>
 

@@ -128,9 +128,6 @@ function RecentMatches({ matches }: { matches: Awaited<ReturnType<typeof getRece
     <Card className="card-faceit border-border/60 bg-card p-5">
       <div className="mb-4 flex items-center justify-between">
         <div className="section-title">Recent Matches</div>
-        <Link to="/matches" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-          View all →
-        </Link>
       </div>
       <div className="space-y-2">
         {matches.map((m) => {

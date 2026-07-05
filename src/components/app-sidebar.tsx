@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Trophy, Swords, Users, ListOrdered, User, Zap } from "lucide-react";
 import caplLogo from "@/assets/APL.png";
+import homeIcon from "@/assets/Home.png";
+import profileIcon from "@/assets/Profile.png";
+import queueIcon from "@/assets/Queue.png";
+import leaderboardIcon from "@/assets/Leaderboard.png";
 import { getGuildInfo } from "@/lib/guild-info";
 import {
   Sidebar,
@@ -17,11 +20,10 @@ import {
 } from "@/components/ui/sidebar";
 
 const primary = [
-  { title: "Home", url: "/", icon: Home, exact: true },
-  { title: "Profile", url: "/profile", icon: User },
-  { title: "Queue", url: "/queue", icon: ListOrdered, accent: true },
-  { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
-  { title: "Matches", url: "/matches", icon: Swords },
+  { title: "Home", url: "/", img: homeIcon, exact: true },
+  { title: "Profile", url: "/profile", img: profileIcon },
+  { title: "Queue", url: "/queue", img: queueIcon, accent: true },
+  { title: "Leaderboard", url: "/leaderboard", img: leaderboardIcon },
 ];
 
 export function AppSidebar() {
@@ -69,11 +71,7 @@ export function AppSidebar() {
                     }`}
                   >
                     <Link to={item.url}>
-                      {item.accent ? (
-                        <Zap className={isActive(item.url, item.exact) ? "text-primary" : ""} />
-                      ) : (
-                        <item.icon />
-                      )}
+                      <img src={item.img} alt={item.title} className="h-5 w-5 object-contain" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>

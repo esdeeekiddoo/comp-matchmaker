@@ -10,7 +10,7 @@ import { RankBadge } from "@/components/rank-badge";
 import { 
   User, Trophy, Target, TrendingUp, Calendar, 
   Swords, Shield, Flame, BarChart3, ExternalLink,
-  ChevronRight, Zap, MapPin
+  Zap, MapPin
 } from "lucide-react";
 import { getPlayerByDiscordId, getPlayerMatches, avatarUrl } from "@/lib/supabase-queries";
 import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
@@ -246,9 +246,6 @@ function ProfilePage() {
               <BarChart3 className="h-5 w-5 text-primary" />
               <h2 className="font-semibold">Recent Matches</h2>
             </div>
-            <Link to="/matches" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors">
-              View All <ChevronRight className="h-4 w-4" />
-            </Link>
           </div>
           <div className="space-y-2">
             {matches.length > 0 ? (
