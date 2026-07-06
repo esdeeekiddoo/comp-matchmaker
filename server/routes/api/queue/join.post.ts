@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
       return { ok: false, error: "You are already in an active match." };
     }
 
-    await fetch(`${url}/rest/v1/web_queue`, {
+    await fetch(`${url}/rest/v1/web_queue?on_conflict=guild_id,user_id`, {
       method: "POST",
       headers: {
         apikey: key,
