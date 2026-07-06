@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
         "Content-Type": "application/json",
         Prefer: "resolution=merge-duplicates",
       },
-      body: JSON.stringify({ guild_id: guildId, user_id: userId, username, avatar_url: avatarUrl }),
+      body: JSON.stringify({ guild_id: guildId, user_id: userId, username, avatar_url: avatarUrl, joined_at: new Date().toISOString() }),
     });
     return { ok: true };
   } catch (err: any) {

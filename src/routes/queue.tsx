@@ -82,6 +82,7 @@ function QueuePage() {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const prevMatchRef = useRef<any>(null);
   const notifiedInviteIds = useRef<Set<number>>(new Set());
+  const dismissedMatchIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     setSession(parseSession());
@@ -128,7 +129,7 @@ function QueuePage() {
     const guildId = getActiveGuildId(session) || undefined;
     try {
       const match = await getActiveMatchForUser(session.user_id, guildId);
-      if (match) {
+      if (match && !dismissedMatchIds.current.has(match.id)) {
         setActiveMatch(match);
         const allIds = [...new Set([...match.atk_team, ...match.def_team])];
         const rows = await getPlayersByIds(allIds);
@@ -931,8 +932,8 @@ function QueuePage() {
             match={activeMatch}
             session={session}
             players={matchPlayers}
-            onMapSelected={() => { setActiveMatch(null); setMatchPlayers([]); }}
-            onClose={() => { setActiveMatch(null); setMatchPlayers([]); }}
+            onMapSelected={() => { dismissedMatchIds.current.add(activeMatch.id); setActiveMatch(null); setMatchPlayers([]); }}
+            onClose={() => { dismissedMatchIds.current.add(activeMatch.id); setActiveMatch(null); setMatchPlayers([]); }}
           />
         )}
       </AnimatePresence>
