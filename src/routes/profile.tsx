@@ -12,7 +12,7 @@ import {
   Swords, Shield, Flame, BarChart3, ExternalLink,
   Zap, MapPin
 } from "lucide-react";
-import { getPlayerByDiscordId, getPlayerMatches, avatarUrl } from "@/lib/supabase-queries";
+import { getPlayerByDiscordId, getPlayerMatches, getPlayerBadges, avatarUrl } from "@/lib/supabase-queries";
 import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
 import { rankFromElo, RANK_COLORS, type Rank } from "@/lib/ranks";
 import { getMapImage } from "@/lib/maps";
@@ -25,6 +25,7 @@ function ProfilePage() {
   const [session, setSession] = useState<Session | null>(null);
   const [player, setPlayer] = useState<any>(null);
   const [matches, setMatches] = useState<any[]>([]);
+  const [badges, setBadges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,12 +42,14 @@ function ProfilePage() {
   async function loadPlayerData(userId: string, s: Session) {
     try {
       const guildId = getActiveGuildId(s) || undefined;
-      const [playerData, matchData] = await Promise.all([
+      const [playerData, matchData, badgeData] = await Promise.all([
         getPlayerByDiscordId(userId, guildId),
         getPlayerMatches(userId, 10, guildId),
+        getPlayerBadges(userId),
       ]);
       setPlayer(playerData);
       setMatches(matchData || []);
+      setBadges(badgeData || []);
     } catch (err) {
       console.error("Failed to load player data:", err);
     } finally {
@@ -238,6 +241,35 @@ function ProfilePage() {
             </div>
           </Card>
         </div>
+
+        {/* Badges Section */}
+        {badges.length > 0 && (
+          <Card className="card-faceit border-border bg-card p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-primary" />
+              <h2 className="font-semibold">Badges</h2>
+              <span className="ml-auto text-xs text-muted-foreground">{badges.length} total</span>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              {badges.map((pb) => (
+                <div
+                  key={pb.id}
+                  className="group relative flex items-center gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 transition-all hover:border-primary/30 hover:bg-muted/30"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/10 ring-1 ring-amber-500/20">
+                    <Trophy className="h-6 w-6 text-amber-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">{pb.badge?.name || "Badge"}</div>
+                    {pb.reason && (
+                      <div className="text-xs text-muted-foreground">{pb.reason}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Recent Matches */}
         <Card className="card-faceit border-border bg-card p-5">

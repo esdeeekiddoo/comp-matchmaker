@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
-  Loader2, Shield, ShieldX, Map, Clock, Users,
+  Loader2, Shield, ShieldX, Map, Clock, Users, X,
   Sword, CheckCircle2,
 } from "lucide-react";
 import { avatarUrl } from "@/lib/supabase-queries";
@@ -36,9 +36,10 @@ type Props = {
   session: { user_id: string; username: string; avatar_url: string };
   players: PlayerInfo[];
   onMapSelected: () => void;
+  onClose?: () => void;
 };
 
-export function BanOverlay({ match, session, players, onMapSelected }: Props) {
+export function BanOverlay({ match, session, players, onMapSelected, onClose }: Props) {
   const [bans, setBans] = useState<string[]>(match.bans || []);
   const [selectedMap, setSelectedMap] = useState<string | null>(match.selected_map);
   const [banning, setBanning] = useState<string | null>(null);
@@ -186,8 +187,18 @@ export function BanOverlay({ match, session, players, onMapSelected }: Props) {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-2xl space-y-6"
+        className="relative w-full max-w-2xl space-y-6"
       >
+        {/* Close button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+
         {/* Header */}
         <div className="text-center">
           <motion.div

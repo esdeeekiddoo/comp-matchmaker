@@ -256,3 +256,39 @@ export async function submitBan(matchId: string, userId: string, mapName: string
   });
   return res.json();
 }
+
+export type BadgeRow = {
+  id: number;
+  name: string;
+  description: string | null;
+  image_url: string;
+  created_at: string;
+};
+
+export type PlayerBadgeRow = {
+  id: number;
+  discord_id: string;
+  badge_id: number;
+  guild_id: string | null;
+  awarded_by: string;
+  reason: string | null;
+  awarded_at: string;
+  badge: BadgeRow;
+};
+
+export async function getPlayerBadges(discordId: string): Promise<PlayerBadgeRow[]> {
+  const { data } = await supabase
+    .from("player_badges")
+    .select("*, badge:badge_id(*)")
+    .eq("discord_id", discordId)
+    .order("awarded_at", { ascending: false });
+  return (data ?? []) as PlayerBadgeRow[];
+}
+
+export async function getBadgeDefinitions(): Promise<BadgeRow[]> {
+  const { data } = await supabase
+    .from("badges")
+    .select("*")
+    .order("name", { ascending: true });
+  return (data ?? []) as BadgeRow[];
+}

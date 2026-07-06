@@ -7,15 +7,18 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RankBadge } from "@/components/rank-badge";
-import { getPlayerByUsername, getEloHistory, avatarUrl } from "@/lib/supabase-queries";
+import { getPlayerByUsername, getEloHistory, getPlayerBadges, avatarUrl } from "@/lib/supabase-queries";
 import { rankFromElo, RANK_COLORS, type Rank } from "@/lib/ranks";
 
 export const Route = createFileRoute("/players/$username")({
   loader: async ({ params }) => {
     const player = await getPlayerByUsername(params.username);
     if (!player) throw notFound();
-    const history = await getEloHistory(player.discord_id);
-    return { player, history };
+    const [history, badges] = await Promise.all([
+      getEloHistory(player.discord_id),
+      getPlayerBadges(player.discord_id),
+    ]);
+    return { player, history, badges };
   },
   head: ({ loaderData }) => ({
     meta: [
@@ -46,7 +49,7 @@ export const Route = createFileRoute("/players/$username")({
 });
 
 function PlayerPage() {
-  const { player, history } = Route.useLoaderData();
+  const { player, history, badges } = Route.useLoaderData();
   const total = player.wins + player.losses;
   const winPct = total > 0 ? Math.round((player.wins / total) * 100) : 0;
   const name = player.username ?? player.discord_id;
@@ -151,6 +154,35 @@ function PlayerPage() {
           <StatTile icon={Shield} label="Losses" value={`${player.losses}`} color="text-destructive" bg="bg-destructive/10" />
           <StatTile icon={Zap} label="ELO" value={`${player.elo}`} color="text-chart-3" bg="bg-chart-3/10" />
         </div>
+
+        {/* Badges */}
+        {badges.length > 0 && (
+          <Card className="card-faceit border-border bg-card p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-primary" />
+              <h2 className="font-semibold">Badges</h2>
+              <span className="ml-auto text-xs text-muted-foreground">{badges.length} total</span>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              {badges.map((pb) => (
+                <div
+                  key={pb.id}
+                  className="group relative flex items-center gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 transition-all hover:border-primary/30 hover:bg-muted/30"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/10 ring-1 ring-amber-500/20">
+                    <Trophy className="h-6 w-6 text-amber-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">{pb.badge?.name || "Badge"}</div>
+                    {pb.reason && (
+                      <div className="text-xs text-muted-foreground">{pb.reason}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {history.length > 0 && (
           <Card className="card-faceit border-border bg-card p-5">

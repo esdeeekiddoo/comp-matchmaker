@@ -867,6 +867,7 @@ function QueuePage() {
             session={session}
             players={matchPlayers}
             onMapSelected={() => { setActiveMatch(null); setMatchPlayers([]); }}
+            onClose={() => { setActiveMatch(null); setMatchPlayers([]); }}
           />
         )}
       </AnimatePresence>
