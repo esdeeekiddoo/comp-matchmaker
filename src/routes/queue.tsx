@@ -253,18 +253,6 @@ function QueuePage() {
     return () => clearInterval(interval);
   }, [fetchActiveMatch]);
 
-  useEffect(() => {
-    if (!inQueue || !myPlayer?.joined_at) return;
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const joined = new Date(myPlayer.joined_at!).getTime();
-      if (now - joined >= QUEUE_TIMEOUT_MIN * 60 * 1000) {
-        handleLeave();
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [inQueue, myPlayer?.joined_at]);
-
   const inQueue = session ? players.some((p) => p.user_id === session.user_id) : false;
   const myPlayer = session ? players.find((p) => p.user_id === session.user_id) : null;
   const count = players.length;
@@ -305,6 +293,18 @@ function QueuePage() {
     if (remaining <= 60 * 1000) return "critical";
     return "normal";
   }
+
+  useEffect(() => {
+    if (!inQueue || !myPlayer?.joined_at) return;
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const joined = new Date(myPlayer.joined_at!).getTime();
+      if (now - joined >= QUEUE_TIMEOUT_MIN * 60 * 1000) {
+        handleLeave();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [inQueue, myPlayer?.joined_at]);
 
   function partyMemberName(userId: string): string {
     const p = players.find((pl) => pl.user_id === userId);
