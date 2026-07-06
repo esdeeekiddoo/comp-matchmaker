@@ -117,7 +117,7 @@ function PlayerPage() {
                 <h1 className="text-display text-3xl font-extrabold text-foreground">{name}</h1>
                 {badges.map(pb => {
                   const src = getBadgeImage(pb.badge?.image_url);
-                  return src ? <img key={pb.id} src={src} alt="" className="h-6 w-6" /> : null;
+                  return src ? <img key={pb.id} src={src} alt="" className="h-10 w-10" /> : null;
                 })}
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">

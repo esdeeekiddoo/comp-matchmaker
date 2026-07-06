@@ -164,7 +164,7 @@ function ProfilePage() {
                   <h1 className="text-display text-2xl font-bold text-foreground">{session.username}</h1>
                   {badges.map(pb => {
                     const src = getBadgeImage(pb.badge?.image_url);
-                    return src ? <img key={pb.id} src={src} alt="" className="h-6 w-6" /> : null;
+                    return src ? <img key={pb.id} src={src} alt="" className="h-10 w-10" /> : null;
                   })}
                   <Badge variant="outline" className="gap-1.5 border-success/30 bg-success/5">
                     <div className="h-2 w-2 animate-pulse rounded-full bg-success" />
