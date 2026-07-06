@@ -20,9 +20,10 @@ import {
 } from "lucide-react";
 import { rankFromElo, RANK_COLORS, type Rank } from "@/lib/ranks";
 import { toast } from "sonner";
-import { avatarUrl, getActiveMatchForUser, getPlayersByIds } from "@/lib/supabase-queries";
+import { avatarUrl, getActiveMatchForUser, getPlayersByIds, getPlayersBadgesMap } from "@/lib/supabase-queries";
 import { BanOverlay } from "@/components/ban-overlay";
 import { parseSession, getActiveGuildId, type Session } from "@/lib/session";
+import { getBadgeImage } from "@/lib/badge-images";
 import heroImg from "@/assets/APL.png";
 import queueIcon from "@/assets/Queue.png";
 import statusIcon from "@/assets/Status.png";
@@ -77,6 +78,7 @@ function QueuePage() {
   const [matchPlayers, setMatchPlayers] = useState<{ user_id: string; username: string; avatar_url: string }[]>([]);
   const [banInfo, setBanInfo] = useState<{ banned: boolean; expires_at?: string; reason?: string } | null>(null);
   const [banCountdown, setBanCountdown] = useState("");
+  const [badgesMap, setBadgesMap] = useState<Record<string, any[]>>({});
   const audioCtxRef = useRef<AudioContext | null>(null);
   const prevMatchRef = useRef<any>(null);
   const notifiedInviteIds = useRef<Set<number>>(new Set());
@@ -90,7 +92,11 @@ function QueuePage() {
       const guildId = getGuildId();
       const res = await fetch(`/api/queue${guildId ? `?guildId=${guildId}` : ""}`);
       const data = await res.json();
-      if (data.players) setPlayers(data.players);
+      if (data.players) {
+        setPlayers(data.players);
+        const ids = data.players.map((p: any) => p.user_id);
+        getPlayersBadgesMap(ids).then(setBadgesMap).catch(() => {});
+      }
     } catch {
       // ignore polling errors
     } finally {
@@ -851,6 +857,10 @@ function QueuePage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <div className="text-sm font-medium text-foreground">{p.username}</div>
+                        {(badgesMap[p.user_id] || []).map(pb => {
+                          const src = getBadgeImage(pb.badge?.image_url);
+                          return src ? <img key={pb.id} src={src} alt="" className="h-5 w-5" /> : null;
+                        })}
                         {p.user_id === session?.user_id && (
                           <Badge variant="secondary" className="text-[10px] px-1.5 py-0">YOU</Badge>
                         )}

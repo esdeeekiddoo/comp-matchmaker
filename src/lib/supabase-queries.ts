@@ -300,3 +300,19 @@ export async function getBadgeDefinitions(): Promise<BadgeRow[]> {
     .order("name", { ascending: true });
   return (data ?? []) as BadgeRow[];
 }
+
+export async function getPlayersBadgesMap(discordIds: string[]): Promise<Record<string, PlayerBadgeRow[]>> {
+  if (discordIds.length === 0) return {};
+  const { data } = await supabase
+    .from("player_badges")
+    .select("*, badge:badge_id(*)")
+    .in("discord_id", discordIds)
+    .order("awarded_at", { ascending: false });
+  const rows = (data ?? []) as PlayerBadgeRow[];
+  const map: Record<string, PlayerBadgeRow[]> = {};
+  for (const row of rows) {
+    if (!map[row.discord_id]) map[row.discord_id] = [];
+    map[row.discord_id].push(row);
+  }
+  return map;
+}
