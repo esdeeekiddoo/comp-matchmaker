@@ -253,6 +253,18 @@ function QueuePage() {
     return () => clearInterval(interval);
   }, [fetchActiveMatch]);
 
+  useEffect(() => {
+    if (!inQueue || !myPlayer?.joined_at) return;
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const joined = new Date(myPlayer.joined_at!).getTime();
+      if (now - joined >= QUEUE_TIMEOUT_MIN * 60 * 1000) {
+        handleLeave();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [inQueue, myPlayer?.joined_at]);
+
   const inQueue = session ? players.some((p) => p.user_id === session.user_id) : false;
   const myPlayer = session ? players.find((p) => p.user_id === session.user_id) : null;
   const count = players.length;
@@ -260,6 +272,8 @@ function QueuePage() {
   const partyMembers = myParty
     ? [myParty.leader_id, ...myParty.members]
     : [];
+
+  const QUEUE_TIMEOUT_MIN = 30;
 
   function getTimeInQueue(joinedAt: string): string {
     const now = new Date();
@@ -269,6 +283,27 @@ function QueuePage() {
     const diffSecs = Math.floor((diffMs % 60000) / 1000);
     if (diffMins > 0) return `${diffMins}m ${diffSecs}s`;
     return `${diffSecs}s`;
+  }
+
+  function getTimeRemaining(joinedAt: string): string {
+    const now = Date.now();
+    const joined = new Date(joinedAt).getTime();
+    const elapsed = now - joined;
+    const remaining = QUEUE_TIMEOUT_MIN * 60 * 1000 - elapsed;
+    if (remaining <= 0) return "Kicked";
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    return `${mins}m ${secs}s`;
+  }
+
+  function getQueueUrgency(joinedAt: string): "normal" | "warning" | "critical" {
+    const now = Date.now();
+    const joined = new Date(joinedAt).getTime();
+    const elapsed = now - joined;
+    const remaining = QUEUE_TIMEOUT_MIN * 60 * 1000 - elapsed;
+    if (remaining <= 5 * 60 * 1000 && remaining > 60 * 1000) return "warning";
+    if (remaining <= 60 * 1000) return "critical";
+    return "normal";
   }
 
   function partyMemberName(userId: string): string {
@@ -691,6 +726,16 @@ function QueuePage() {
                 <span className="font-mono text-sm font-semibold text-primary">
                   {getTimeInQueue(myPlayer.joined_at)}
                 </span>
+                <span className="text-xs text-muted-foreground">·</span>
+                {(() => {
+                  const urgency = getQueueUrgency(myPlayer.joined_at);
+                  const color = urgency === "critical" ? "text-destructive" : urgency === "warning" ? "text-amber-400" : "text-muted-foreground";
+                  return (
+                    <span className={`text-xs ${color}`}>
+                      {getTimeRemaining(myPlayer.joined_at)} left
+                    </span>
+                  );
+                })()}
               </div>
             )}
           </div>
@@ -832,6 +877,16 @@ function QueuePage() {
                           <Clock className="h-3 w-3" />
                           {getTimeInQueue(p.joined_at)}
                         </span>
+                        <span className="text-[11px] text-muted-foreground">·</span>
+                        {(() => {
+                          const urgency = getQueueUrgency(p.joined_at);
+                          const color = urgency === "critical" ? "text-destructive" : urgency === "warning" ? "text-amber-400" : "text-muted-foreground";
+                          return (
+                            <span className={`text-[11px] ${color}`}>
+                              {getTimeRemaining(p.joined_at)} left
+                            </span>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
