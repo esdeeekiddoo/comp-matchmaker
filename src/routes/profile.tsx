@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,17 +28,31 @@ function ProfilePage() {
   const [matches, setMatches] = useState<any[]>([]);
   const [badges, setBadges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const prevGuildRef = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
     const s = parseSession();
     setSession(s);
-    
     if (s) {
+      const gid = getActiveGuildId(s);
+      prevGuildRef.current = gid;
       loadPlayerData(s.user_id, s);
     } else {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    const interval = setInterval(() => {
+      const current = getActiveGuildId(session);
+      if (current !== prevGuildRef.current) {
+        prevGuildRef.current = current;
+        loadPlayerData(session.user_id, session);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [session]);
 
   async function loadPlayerData(userId: string, s: Session) {
     try {

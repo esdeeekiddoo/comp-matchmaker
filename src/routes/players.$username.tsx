@@ -7,13 +7,14 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RankBadge } from "@/components/rank-badge";
-import { getPlayerByUsername, getEloHistory, getPlayerBadges, avatarUrl } from "@/lib/supabase-queries";
+import { getPlayerByUsername, getPlayerByDiscordId, getEloHistory, getPlayerBadges, avatarUrl } from "@/lib/supabase-queries";
 import { rankFromElo, RANK_COLORS, type Rank } from "@/lib/ranks";
 import { getBadgeImage } from "@/lib/badge-images";
 
 export const Route = createFileRoute("/players/$username")({
   loader: async ({ params }) => {
-    const player = await getPlayerByUsername(params.username);
+    let player = await getPlayerByUsername(params.username);
+    if (!player) player = await getPlayerByDiscordId(params.username);
     if (!player) throw notFound();
     const [history, badges] = await Promise.all([
       getEloHistory(player.discord_id),
