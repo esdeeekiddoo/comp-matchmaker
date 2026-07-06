@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const res = await fetch(
-      `${url}/rest/v1/web_queue?guild_id=eq.${guildId}&select=user_id,username,avatar_url,joined_at&order=joined_at.asc`,
+      `${url}/rest/v1/web_queue?guild_id=eq.${guildId}&select=id,user_id,username,avatar_url,joined_at&order=joined_at.asc`,
       { headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" } },
     );
     const rows = await res.json();
@@ -24,10 +24,10 @@ export default defineEventHandler(async (event) => {
       if (!r.joined_at) return false;
       return now - new Date(r.joined_at).getTime() < THIRTY_MIN_MS;
     });
-    const expiredIds = rows.filter((r: any) => !active.includes(r)).map((r: any) => r.user_id);
-    if (expiredIds.length > 0) {
+    const expiredRowIds = rows.filter((r: any) => !active.includes(r)).map((r: any) => r.id);
+    if (expiredRowIds.length > 0) {
       fetch(
-        `${url}/rest/v1/web_queue?guild_id=eq.${guildId}&user_id=in.(${expiredIds.join(",")})`,
+        `${url}/rest/v1/web_queue?id=in.(${expiredRowIds.join(",")})`,
         { method: "DELETE", headers: { apikey: key, Authorization: `Bearer ${key}` } },
       ).catch(() => {});
     }
