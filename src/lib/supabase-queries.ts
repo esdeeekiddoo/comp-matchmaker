@@ -197,13 +197,21 @@ export function avatarUrl(row: { discord_id?: string; user_id?: string; avatar_u
 
 export async function getPlayerByDiscordId(discordId: string, guildId?: string): Promise<PlayerRow | null> {
   if (guildId) {
-    const { data } = await supabase
+    const { data: guildData } = await supabase
       .from("guild_players")
       .select("discord_id, elo, wins, losses")
       .eq("discord_id", discordId)
       .eq("guild_id", guildId)
       .single();
-    if (data) return data as PlayerRow;
+    const { data: globalData } = await supabase
+      .from("players")
+      .select("username, avatar_url")
+      .eq("discord_id", discordId)
+      .single();
+    if (guildData) {
+      return { ...guildData, username: globalData?.username ?? null, avatar_url: globalData?.avatar_url ?? null } as PlayerRow;
+    }
+    return { discord_id: discordId, username: globalData?.username ?? null, avatar_url: globalData?.avatar_url ?? null, elo: 100, wins: 0, losses: 0 } as PlayerRow;
   }
   const { data } = await supabase
     .from("players")
